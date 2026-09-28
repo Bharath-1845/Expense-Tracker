@@ -1,0 +1,162 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense & Budget Tracker</title>
+    <link rel="stylesheet" href="{% static 'tasks/css/style.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- BUDGET SUMMARY DASHBOARD -->
+      <section class="card">
+        <h2>Budget Summary</h2>
+        <div class="budget-dashboard">
+          <div class="budget-card income-card">
+            <h4>Total Income</h4>
+            <p>₹<span id="summary-income">0.00</span></p>
+          </div>
+          <div class="budget-card expense-card">
+            <h4>Total Expenses</h4>
+            <p>₹<span id="summary-expense">0.00</span></p>
+          </div>
+          <div class="budget-card balance-card">
+            <h4>Remaining Balance</h4>
+            <p>₹<span id="summary-balance">0.00</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADD INCOME -->
+      <section class="card">
+        <h2>Add Income</h2>
+        <form id="income-form" method="POST">
+          {% csrf_token %}
+          <div class="input-group">
+            <label for="inc-source">Income Source</label>
+            <input
+              type="text"
+              id="inc-source"
+              name="source"
+              placeholder="E.g., Salary, Freelance"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label for="inc-amount">Amount (₹)</label>
+            <input
+              type="number"
+              id="inc-amount"
+              name="amount"
+              min="1"
+              step="0.01"
+              placeholder="0.00"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-success">Add Income</button>
+        </form>
+      </section>
+
+      <!-- ADD EXPENSES -->
+      <section class="card">
+        <h2>Add Expense</h2>
+        <form id="expense-form" method="POST">
+          {% csrf_token %}
+          <div class="input-group">
+            <label for="exp-desc">Description</label>
+            <input
+              type="text"
+              id="exp-desc"
+              name="desc"
+              placeholder="E.g., Groceries, Internet"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label for="exp-amount">Amount (₹)</label>
+            <input
+              type="number"
+              id="exp-amount"
+              name="amount"
+              min="1"
+              step="0.01"
+              placeholder="0.00"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label for="exp-category">Category</label>
+            <select id="exp-category" name="category">
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-danger">Add Expense</button>
+        </form>
+
+        <div class="expense-list-container">
+          <h3>Recent Expenses</h3>
+          <table id="expense-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody id="expense-tbody">
+              <!-- Dynamic rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- USER REGISTRATION -->
+      <section class="card">
+        <h2>User Registration</h2>
+        <form id="registration-form" method="POST">
+          {% csrf_token %}
+          <div class="input-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Register</button>
+          <p id="reg-message" class="message"></p>
+        </form>
+      </section>
+    </div>
+
+    <script src="{% static 'tasks/js/script.js' %}"></script>
+  </body>
+</html>
