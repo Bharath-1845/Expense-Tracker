@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Expense Manager{% endblock %}</title>
+    <link rel="stylesheet" href="/login-page/style.css">
+</head>
+<body>
+    <main class="login-container">
+        <section class="login-box reset-box">
+            <a class="reset-logo" href="/" aria-label="Expense Manager home">💰</a>
+            <h1>{% block heading %}Expense Manager{% endblock %}</h1>
+            {% block content %}{% endblock %}
+        </section>
+    </main>
+</body>
+</html>

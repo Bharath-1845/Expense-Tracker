@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Expense Manager - Login</title>
+
+    <link rel="stylesheet" href="/login-page/style.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-box">
+
+            <div class="logo">
+                💰
+            </div>
+
+            <h1>Expense Manager</h1>
+            <p class="subtitle">Manage your expenses easily</p>
+
+            <form id="loginForm" novalidate>
+
+                <div class="input-group">
+                    <label for="email">Email</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        autocomplete="username"
+                        required
+                        aria-describedby="emailError"
+                    >
+
+                    <small id="emailError"></small>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+
+                    <div class="password-box">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                            aria-describedby="passwordError"
+                        >
+
+                        <button
+                            type="button"
+                            id="showPassword"
+                            aria-controls="password"
+                            aria-pressed="false"
+                        >
+                            Show
+                        </button>
+                    </div>
+
+                    <small id="passwordError"></small>
+                </div>
+
+                <div class="options">
+                    <label>
+                        <input type="checkbox" id="remember">
+                        Remember me
+                    </label>
+
+                    <a href="/password-reset/">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-button" id="loginButton">
+                    Login
+                </button>
+
+                <p id="loginMessage" role="status" aria-live="polite"></p>
+
+            </form>
+
+            <p class="signup">
+                Accounts are created by your administrator.
+            </p>
+
+        </div>
+
+    </div>
+
+    <script src="/login-page/script.js" defer></script>
+
+</body>
+</html>
