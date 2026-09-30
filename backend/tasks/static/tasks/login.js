@@ -29,7 +29,8 @@ loginForm.addEventListener("submit", async (event) => {
     const password = passwordInput.value;
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    setFieldError(emailInput, emailError, !email ? "Please enter your email." : !validEmail ? "Please enter a valid email." : "");
+    setFieldError(emailInput, emailError, !email ? "Please enter your email." :
+        !validEmail ? "Please enter a valid email." : "");
     setFieldError(passwordInput, passwordError, password ? "" : "Please enter your password.");
 
     if (!email || !validEmail || !password) {

@@ -154,6 +154,20 @@ class PasswordResetFlowTests(TestCase):
 		self.assertRedirects(response, reverse('password-reset-done'))
 		self.assertEqual(len(mail.outbox), 0)
 
+	def test_reset_form_uses_project_template(self):
+		response = self.client.get(reverse('password-reset'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Password Reset')
+		self.assertContains(response, 'Expense Manager')
+		self.assertContains(response, '/static/tasks/app.css')
+		self.assertNotContains(response, 'Django administration')
+
+	def test_admin_password_reset_link_redirects_to_project_form(self):
+		response = self.client.get('/admin/password_reset/')
+
+		self.assertRedirects(response, reverse('password-reset'), fetch_redirect_response=False)
+
 	def test_login_page_links_to_password_reset(self):
 		response = self.client.get('/')
 
