@@ -4,12 +4,11 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
 
-LOGIN_PAGE = settings.BASE_DIR / 'login-page' / 'index.html'
 DASHBOARD_PAGE = settings.BASE_DIR / 'login-page' / 'dashboard.html'
 
 
@@ -18,7 +17,7 @@ DASHBOARD_PAGE = settings.BASE_DIR / 'login-page' / 'dashboard.html'
 def login_page(request):
 	if request.user.is_authenticated:
 		return redirect('dashboard')
-	return FileResponse(LOGIN_PAGE.open('rb'))
+	return render(request, 'registration/login.html')
 
 
 @require_GET

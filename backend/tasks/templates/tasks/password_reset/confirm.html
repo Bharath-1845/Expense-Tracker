@@ -1,6 +1,6 @@
-{% extends "registration/base.html" %}
+{% extends "tasks/password_reset/base.html" %}
 
-{% block title %}Choose a new password | Expense Manager{% endblock %}
+{% block title %}Choose a New Password | Expense Manager{% endblock %}
 {% block heading %}Choose a new password{% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
 </form>
 {% else %}
 <p class="reset-copy">This password reset link is invalid or has expired. Request a new link to continue.</p>
-<a class="login-button reset-button-link" href="/password-reset/">Request a new link</a>
+<a class="login-button reset-button-link" href="{% url 'password-reset' %}">Request a new link</a>
 {% endif %}
-<a class="reset-back" href="/">Back to login</a>
+<a class="reset-back" href="{% url 'login' %}">Back to login</a>
 {% endblock %}

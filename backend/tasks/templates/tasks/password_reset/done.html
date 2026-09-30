@@ -1,9 +1,9 @@
-{% extends "registration/base.html" %}
+{% extends "tasks/password_reset/base.html" %}
 
-{% block title %}Check your email | Expense Manager{% endblock %}
+{% block title %}Check Your Email | Expense Manager{% endblock %}
 {% block heading %}Check your email{% endblock %}
 
 {% block content %}
 <p class="reset-copy">If an active account matches that email address, a password reset link is on its way. Check your inbox and spam folder.</p>
-<a class="reset-back" href="/">Back to login</a>
+<a class="reset-back" href="{% url 'login' %}">Back to login</a>
 {% endblock %}

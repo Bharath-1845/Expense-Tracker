@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,7 @@
 
     <title>Expense Manager - Login</title>
 
-    <link rel="stylesheet" href="/login-page/style.css">
+    <link rel="stylesheet" href="{% static 'tasks/app.css' %}">
 </head>
 
 <body>
@@ -73,7 +74,7 @@
                         Remember me
                     </label>
 
-                    <a href="/password-reset/">Forgot Password?</a>
+                    <a href="{% url 'password-reset' %}">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="login-button" id="loginButton">
@@ -92,7 +93,7 @@
 
     </div>
 
-    <script src="/login-page/script.js" defer></script>
+    <script src="{% static 'tasks/login.js' %}" defer></script>
 
 </body>
 </html>

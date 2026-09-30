@@ -1,0 +1,9 @@
+{% extends "tasks/password_reset/base.html" %}
+
+{% block title %}Password Updated | Expense Manager{% endblock %}
+{% block heading %}Password updated{% endblock %}
+
+{% block content %}
+<p class="reset-copy">Your password has been changed. You can now sign in with your new password.</p>
+<a class="login-button reset-button-link" href="{% url 'login' %}">Return to login</a>
+{% endblock %}

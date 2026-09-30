@@ -1,69 +1,56 @@
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-
     min-height: 100vh;
-
+    margin: 0;
+    padding: 24px;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #333;
+    font-family: Arial, sans-serif;
 }
 
 .login-container {
     width: 100%;
-    padding: 20px;
 }
 
 .login-box {
     width: 400px;
     max-width: 100%;
-
     margin: auto;
     padding: 35px;
-
-    background: white;
-
     border-radius: 15px;
-
+    background: #fff;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .logo {
     width: 65px;
     height: 65px;
-
     margin: 0 auto 15px;
-
     display: flex;
-    justify-content: center;
     align-items: center;
-
-    background: #667eea;
-
+    justify-content: center;
     border-radius: 50%;
-
+    background: #667eea;
     font-size: 30px;
 }
 
 h1 {
-    text-align: center;
+    margin: 0;
     color: #333;
-
     font-size: 25px;
+    text-align: center;
 }
 
 .subtitle {
-    text-align: center;
+    margin: 8px 0 30px;
     color: #777;
-
-    margin-top: 8px;
-    margin-bottom: 30px;
+    text-align: center;
 }
 
 .input-group {
@@ -72,9 +59,7 @@ h1 {
 
 .input-group label {
     display: block;
-
     margin-bottom: 7px;
-
     color: #333;
     font-weight: bold;
 }
@@ -82,19 +67,15 @@ h1 {
 .input-group input[type="email"],
 .input-group input[type="password"] {
     width: 100%;
-
     padding: 12px;
-
     border: 1px solid #ccc;
     border-radius: 7px;
-
     font-size: 15px;
-
-    outline: none;
 }
 
 .input-group input:focus {
     border-color: #667eea;
+    outline: 2px solid rgba(102, 126, 234, 0.25);
 }
 
 .password-box {
@@ -107,79 +88,49 @@ h1 {
 
 .password-box button {
     position: absolute;
-
-    right: 5px;
     top: 5px;
-
+    right: 5px;
     height: 34px;
-
     padding: 0 10px;
-
-    border: none;
-
+    border: 0;
     background: transparent;
-
-    color: #667eea;
-
+    color: #5568d9;
     cursor: pointer;
-}
-
-.password-box button:focus-visible,
-.login-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-    outline: 3px solid rgba(102, 126, 234, 0.35);
-    outline-offset: 2px;
-}
-
-small {
-    display: block;
-
-    margin-top: 5px;
-
-    color: #e74c3c;
 }
 
 .options {
     display: flex;
-
-    justify-content: space-between;
     align-items: center;
-
+    justify-content: space-between;
     margin-bottom: 25px;
-
     font-size: 14px;
 }
 
 .options a,
-.signup a {
-    color: #667eea;
-
+.signup a,
+.reset-back {
+    color: #5568d9;
     text-decoration: none;
 }
 
 .options a:hover,
-.signup a:hover {
+.signup a:hover,
+.reset-back:hover {
     text-decoration: underline;
 }
 
 .login-button {
+    display: inline-block;
     width: 100%;
-
     padding: 13px;
-
-    border: none;
-
+    border: 0;
     border-radius: 7px;
-
     background: #667eea;
-
-    color: white;
-
+    color: #fff;
     font-size: 16px;
-
     font-weight: bold;
-
+    text-align: center;
+    text-decoration: none;
     cursor: pointer;
 }
 
@@ -187,32 +138,31 @@ small {
     background: #5568d9;
 }
 
+.login-button:disabled {
+    cursor: wait;
+    opacity: 0.75;
+}
+
 #loginMessage {
-    text-align: center;
-
     margin-top: 15px;
-
-    font-weight: bold;
     color: #b42318;
+    font-weight: bold;
+    text-align: center;
 }
 
 #loginMessage.success {
     color: #137547;
 }
 
-.login-button:disabled {
-    cursor: wait;
-    opacity: 0.75;
+.signup {
+    margin-top: 25px;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
 }
 
-.signup {
-    text-align: center;
-
-    margin-top: 25px;
-
-    color: #666;
-
-    font-size: 14px;
+.reset-box > h1 {
+    margin-bottom: 12px;
 }
 
 .reset-logo {
@@ -222,10 +172,6 @@ small {
     color: inherit;
     font-size: 30px;
     text-decoration: none;
-}
-
-.reset-box > h1 {
-    margin-bottom: 12px;
 }
 
 .reset-copy {
@@ -247,8 +193,10 @@ small {
     font-size: 15px;
 }
 
-.form-errors {
-    margin: 0 0 16px;
+.form-errors,
+small {
+    display: block;
+    margin: 5px 0 0;
     color: #b42318;
     line-height: 1.5;
 }
@@ -256,16 +204,22 @@ small {
 .reset-back {
     display: block;
     margin-top: 20px;
-    color: #667eea;
     text-align: center;
-    text-decoration: none;
 }
 
-.reset-back:hover {
-    text-decoration: underline;
+.reset-button-link {
+    width: 100%;
+}
+
+:focus-visible {
+    outline: 3px solid rgba(102, 126, 234, 0.35);
+    outline-offset: 2px;
 }
 
 @media (max-width: 480px) {
+    body {
+        padding: 16px;
+    }
 
     .login-box {
         padding: 25px 20px;
@@ -277,10 +231,9 @@ small {
 }
 
 @media (max-width: 360px) {
-
     .options {
         align-items: flex-start;
-        gap: 12px;
         flex-direction: column;
+        gap: 12px;
     }
 }
