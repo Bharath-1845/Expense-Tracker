@@ -7,6 +7,8 @@ from django.http import FileResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
+from django.db.models import Sum
+from .models import Transaction
 
 
 DASHBOARD_PAGE = settings.BASE_DIR / 'login-page' / 'dashboard.html'
@@ -79,3 +81,33 @@ def dashboard(request):
 @login_required(login_url='/')
 def session_api(request):
 	return JsonResponse({'username': request.user.get_username(), 'email': request.user.email})
+
+
+
+@login_required(login_url='/')
+def expense_summary(request):
+    total_income = Transaction.objects.filter(
+        user=request.user,
+        transaction_type='income'
+    ).aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+
+    total_expenses = Transaction.objects.filter(
+        user=request.user,
+        transaction_type='expense'
+    ).aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+
+    remaining_balance = total_income - total_expenses
+
+    return render(
+        request,
+        'tasks/expense_summary.html',
+        {
+            'total_income': total_income,
+            'total_expenses': total_expenses,
+            'remaining_balance': remaining_balance,
+        }
+    )

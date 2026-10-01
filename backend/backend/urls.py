@@ -35,6 +35,11 @@ urlpatterns = [
     path('api/session/', views.session_api, name='session-api'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path(
+    'expense-summary/',
+    views.expense_summary,
+    name='expense-summary'
+    ),
+    path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(
             template_name='tasks/password_reset/form.html',

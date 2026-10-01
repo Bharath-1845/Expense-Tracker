@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Summary</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            width: 250px;
+            padding: 25px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            font-size: 18px;
+        }
+
+        .amount {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .income {
+            color: green;
+        }
+
+        .expense {
+            color: red;
+        }
+
+        .balance {
+            color: blue;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Expense Summary</h1>
+
+    <div class="summary">
+
+        <div class="card">
+            <h2>Total Income</h2>
+            <div class="amount income">
+                ₹{{ total_income }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Total Expenses</h2>
+            <div class="amount expense">
+                ₹{{ total_expenses }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Remaining Balance</h2>
+            <div class="amount balance">
+                ₹{{ remaining_balance }}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
