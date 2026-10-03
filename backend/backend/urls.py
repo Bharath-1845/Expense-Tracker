@@ -17,9 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
+from django.urls import path
 from tasks import views
 
 urlpatterns = [
+    path(
+        'admin/password_reset/',
+        RedirectView.as_view(pattern_name='password-reset', permanent=False),
+        name='admin-password-reset-redirect',
+    ),
     path('admin/', admin.site.urls),
     path('', views.ledger_page, {'page': 'dashboard'}, name='home'),
     path('login/', views.login_page, name='login-page'),
@@ -40,9 +46,9 @@ urlpatterns = [
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(
-            template_name='registration/password_reset_form.html',
-            email_template_name='registration/password_reset_email.txt',
-            subject_template_name='registration/password_reset_subject.txt',
+            template_name='tasks/password_reset/form.html',
+            email_template_name='tasks/password_reset/email.txt',
+            subject_template_name='tasks/password_reset/subject.txt',
             success_url=reverse_lazy('password-reset-done'),
         ),
         name='password-reset',
@@ -50,14 +56,14 @@ urlpatterns = [
     path(
         'password-reset/done/',
         auth_views.PasswordResetDoneView.as_view(
-            template_name='registration/password_reset_done.html',
+            template_name='tasks/password_reset/done.html',
         ),
         name='password-reset-done',
     ),
     path(
         'reset/<uidb64>/<token>/',
         auth_views.PasswordResetConfirmView.as_view(
-            template_name='registration/password_reset_confirm.html',
+            template_name='tasks/password_reset/confirm.html',
             success_url=reverse_lazy('password-reset-complete'),
         ),
         name='password-reset-confirm',
@@ -65,7 +71,7 @@ urlpatterns = [
     path(
         'reset/done/',
         auth_views.PasswordResetCompleteView.as_view(
-            template_name='registration/password_reset_complete.html',
+            template_name='tasks/password_reset/complete.html',
         ),
         name='password-reset-complete',
     ),
