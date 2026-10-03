@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#142b4a">
+    <title>{% block title %}Expense Manager{% endblock %}</title>
+    <link rel="stylesheet" href="/login-page/style.css">
+</head>
+<body class="ledger-app" data-page="{{ active_page }}">
+    <aside class="ledger-sidebar">
+        <a class="brand" href="{% url 'dashboard' %}" aria-label="Expense Manager dashboard">
+            <span class="brand-mark" aria-hidden="true">₹</span>
+            <span><strong>Expense Manager</strong><small>PERSONAL LEDGER</small></span>
+        </a>
+        <nav class="ledger-nav" aria-label="Main navigation">
+            <a class="nav-link{% if active_page == 'dashboard' %} active{% endif %}" href="{% url 'dashboard' %}"{% if active_page == 'dashboard' %} aria-current="page"{% endif %}><span aria-hidden="true">⌂</span>Dashboard</a>
+            <a class="nav-link{% if active_page == 'expense_add' %} active{% endif %}" href="{% url 'expense-add' %}"{% if active_page == 'expense_add' %} aria-current="page"{% endif %}><span aria-hidden="true">＋</span>Add Expense</a>
+            <a class="nav-link{% if active_page == 'expenses' %} active{% endif %}" href="{% url 'expense-list' %}"{% if active_page == 'expenses' %} aria-current="page"{% endif %}><span aria-hidden="true">☷</span>View Expenses</a>
+            <a class="nav-link{% if active_page == 'income_add' %} active{% endif %}" href="{% url 'income-add' %}"{% if active_page == 'income_add' %} aria-current="page"{% endif %}><span aria-hidden="true">↗</span>Add Income</a>
+            <a class="nav-link{% if active_page == 'incomes' %} active{% endif %}" href="{% url 'income-list' %}"{% if active_page == 'incomes' %} aria-current="page"{% endif %}><span aria-hidden="true">≋</span>View Income</a>
+            <a class="nav-link{% if active_page == 'reports' %} active{% endif %}" href="{% url 'reports' %}"{% if active_page == 'reports' %} aria-current="page"{% endif %}><span aria-hidden="true">▥</span>Reports</a>
+        </nav>
+        <div class="sidebar-note">
+            <div class="ledger-illustration" aria-hidden="true"><span>₹</span><i></i></div>
+            <p>Small steps today,<br>more clarity tomorrow.</p>
+        </div>
+        <p class="sidebar-foot">YOUR MONEY, IN FOCUS</p>
+    </aside>
+    <div class="ledger-shell">
+        <header class="ledger-topbar">
+            <a class="mobile-brand" href="{% url 'dashboard' %}"><span class="brand-mark" aria-hidden="true">₹</span><strong>Expense Manager</strong></a>
+            <div class="topbar-copy"><span class="status-dot"></span><span>Local expense dashboard</span></div>
+            <time id="todayLabel"></time>
+        </header>
+        <main class="ledger-main">
+            {% block content %}{% endblock %}
+            <p class="privacy-note">Transactions are stored in this project's database. Anyone with access to this app can view and change them.</p>
+        </main>
+    </div>
+    <script src="/login-page/ledger.js" defer></script>
+</body>
+</html>

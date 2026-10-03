@@ -3,57 +3,558 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Manager - Dashboard</title>
+    <meta name="theme-color" content="#142b4a">
+    <title>Expenses | Expense Manager</title>
     <link rel="stylesheet" href="/login-page/style.css">
-    <style>
-        .dashboard-box { text-align: center; }
-        .dashboard-box p { margin: 18px 0 24px; color: #666; }
-    </style>
 </head>
-<body>
-    <main class="login-container">
-        <section class="login-box dashboard-box">
-            <div class="logo" aria-hidden="true">💰</div>
-            <h1>Expense Manager</h1>
-            <p>Welcome, <strong id="signedInUser">...</strong>. You are signed in.</p>
-            <button class="login-button" id="logoutButton" type="button">Log out</button>
-            <p id="loginMessage" role="status" aria-live="polite"></p>
-        </section>
-    </main>
+<body class="ledger-app">
+    <aside class="ledger-sidebar">
+        <a class="brand" href="/" aria-label="Expense Manager dashboard">
+            <span class="brand-mark" aria-hidden="true">₹</span>
+            <span><strong>Expense Manager</strong><small>PERSONAL LEDGER</small></span>
+        </a>
+        <nav class="ledger-nav" aria-label="Main navigation">
+            <a class="nav-link active" href="#overview" aria-current="page"><span aria-hidden="true">⌂</span>Dashboard</a>
+            <a class="nav-link" href="#expense-form"><span aria-hidden="true">＋</span>Add Expense</a>
+            <a class="nav-link" href="#expense-list"><span aria-hidden="true">☷</span>View Expenses</a>
+            <a class="nav-link" href="#income-form"><span aria-hidden="true">＋</span>Add Income</a>
+            <a class="nav-link" href="#income-list"><span aria-hidden="true">↗</span>View Income</a>
+            <a class="nav-link" href="#reports"><span aria-hidden="true">▥</span>Reports</a>
+        </nav>
+        <div class="sidebar-note">
+            <div class="ledger-illustration" aria-hidden="true"><span>₹</span><i></i></div>
+            <p>Small steps today,<br>more clarity tomorrow.</p>
+        </div>
+        <p class="sidebar-foot">YOUR MONEY, IN FOCUS</p>
+    </aside>
+
+    <div class="ledger-shell">
+        <header class="ledger-topbar">
+            <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">₹</span><strong>Expense Manager</strong></div>
+            <div class="topbar-copy"><span class="status-dot"></span><span>Local expense dashboard</span></div>
+            <time id="todayLabel"></time>
+        </header>
+
+        <main class="ledger-main" id="overview">
+            <section class="welcome-row">
+                <div>
+                    <p class="eyebrow">YOUR FINANCES, ORGANIZED</p>
+                    <h1>Expense dashboard</h1>
+                    <p class="welcome-copy">A clear view of where your money goes.</p>
+                </div>
+                <button class="button-primary add-shortcut" type="button" data-scroll-to="expense-form"><span aria-hidden="true">＋</span> Add expense</button>
+            </section>
+
+            <section class="summary-grid" aria-label="Financial summary">
+                <article class="summary-card total-card">
+                    <div class="summary-label"><span class="summary-icon income-icon">↗</span><span>Total income</span></div>
+                    <p class="summary-value" id="totalIncome">₹0.00</p>
+                    <p class="summary-detail" id="incomeCount">0 income entries</p>
+                </article>
+                <article class="summary-card">
+                    <div class="summary-label"><span class="summary-icon expense-icon">↘</span><span>Total expenses</span></div>
+                    <p class="summary-value" id="totalExpenses">₹0.00</p>
+                    <p class="summary-detail" id="expenseCount">0 expense entries</p>
+                </article>
+                <article class="summary-card">
+                    <div class="summary-label"><span class="summary-icon balance-icon">＝</span><span>Remaining balance</span></div>
+                    <p class="summary-value" id="remainingBalance">₹0.00</p>
+                    <p class="summary-detail">Income minus expenses</p>
+                </article>
+                <article class="summary-card">
+                    <div class="summary-label"><span class="summary-icon month-icon">◷</span><span>This month spent</span></div>
+                    <p class="summary-value" id="monthAmount">₹0.00</p>
+                    <p class="summary-detail" id="monthDetail">Current month spending</p>
+                </article>
+            </section>
+
+            <section class="workspace-grid">
+                <section class="panel editor-panel" id="expense-form" aria-labelledby="formTitle">
+                    <div class="panel-heading">
+                        <span class="panel-icon edit-icon" aria-hidden="true">✎</span>
+                        <div><h2 id="formTitle">Add expense</h2><p>Record the details below.</p></div>
+                    </div>
+                    <form id="expenseForm" novalidate>
+                        <div class="form-grid">
+                            <div class="field-group">
+                                <label for="amount">Amount (₹)</label>
+                                <div class="input-with-icon"><span aria-hidden="true">₹</span><input id="amount" name="amount" type="number" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" placeholder="0.00" required></div>
+                            </div>
+                            <div class="field-group">
+                                <label for="category">Category</label>
+                                <div class="category-picker">
+                                    <input id="categorySearch" class="category-search" type="search" placeholder="Find a category..." aria-label="Search available expense categories" autocomplete="off">
+                                    <div class="input-with-icon"><span aria-hidden="true">▦</span><select id="category" name="category" required><option value="">Choose a category</option></select></div>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="expenseDate">Date</label>
+                                <div class="input-with-icon"><span aria-hidden="true">▦</span><input id="expenseDate" name="date" type="date" required></div>
+                            </div>
+                            <div class="field-group description-field">
+                                <label for="description">Description <span>OPTIONAL</span></label>
+                                <textarea id="description" name="description" rows="2" maxlength="1000" placeholder="Add a note about this expense"></textarea>
+                            </div>
+                        </div>
+                        <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button class="button-primary" id="saveExpense" type="submit">Save expense</button>
+                            <button class="button-quiet" id="cancelEdit" type="button" hidden>Cancel</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel report-panel" id="reports" aria-labelledby="reportTitle">
+                    <div class="panel-heading compact-heading">
+                        <span class="panel-icon report-icon" aria-hidden="true">▥</span>
+                        <div><h2 id="reportTitle">By category</h2><p>Spending breakdown</p></div>
+                    </div>
+                    <div id="categoryReport" class="category-report"><p class="muted-empty">Add an expense to see your breakdown.</p></div>
+                    <div class="report-divider"></div>
+                    <div class="report-subheading">Income by source</div>
+                    <div id="incomeReport" class="category-report"><p class="muted-empty">Add income to see your breakdown.</p></div>
+                </section>
+            </section>
+
+            <section class="workspace-grid income-workspace-grid">
+                <section class="panel editor-panel" id="income-form" aria-labelledby="incomeFormTitle">
+                    <div class="panel-heading">
+                        <span class="panel-icon income-panel-icon" aria-hidden="true">↗</span>
+                        <div><h2 id="incomeFormTitle">Add income</h2><p>Record money received.</p></div>
+                    </div>
+                    <form id="incomeForm" novalidate>
+                        <div class="form-grid">
+                            <div class="field-group">
+                                <label for="incomeAmount">Amount (₹)</label>
+                                <div class="input-with-icon"><span aria-hidden="true">₹</span><input id="incomeAmount" name="amount" type="number" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" placeholder="0.00" required></div>
+                            </div>
+                            <div class="field-group">
+                                <label for="incomeSource">Source</label>
+                                <div class="input-with-icon"><span aria-hidden="true">↗</span><input id="incomeSource" name="source" type="text" list="incomeSources" maxlength="50" placeholder="e.g. Salary" required></div>
+                                <datalist id="incomeSources"><option value="Salary"><option value="Freelance"><option value="Investment"><option value="Gift"><option value="Other"></datalist>
+                            </div>
+                            <div class="field-group">
+                                <label for="incomeDate">Date</label>
+                                <div class="input-with-icon"><span aria-hidden="true">▦</span><input id="incomeDate" name="date" type="date" required></div>
+                            </div>
+                            <div class="field-group description-field">
+                                <label for="incomeDescription">Description <span>OPTIONAL</span></label>
+                                <textarea id="incomeDescription" name="description" rows="2" maxlength="1000" placeholder="Add a note about this income"></textarea>
+                            </div>
+                        </div>
+                        <p id="incomeMessage" class="form-message" role="status" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button class="button-primary income-save-button" id="saveIncome" type="submit">Save income</button>
+                            <button class="button-quiet" id="cancelIncomeEdit" type="button" hidden>Cancel</button>
+                        </div>
+                    </form>
+                </section>
+                <section class="panel report-panel income-help-panel" aria-labelledby="incomeInfoTitle">
+                    <div class="panel-heading compact-heading">
+                        <span class="panel-icon income-panel-icon" aria-hidden="true">₹</span>
+                        <div><h2 id="incomeInfoTitle">Income tracking</h2><p>Income is stored separately from expenses.</p></div>
+                    </div>
+                    <p class="income-help-copy">Add salary, freelance payments, investments, or other money received. Your balance and reports update after each saved change.</p>
+                </section>
+            </section>
+
+            <section class="panel expenses-panel" id="expense-list" aria-labelledby="expensesTitle">
+                <div class="list-heading">
+                    <div class="panel-heading compact-heading">
+                        <span class="panel-icon list-icon" aria-hidden="true">☷</span>
+                        <div><h2 id="expensesTitle">Your expenses</h2><p>Review and manage your entries.</p></div>
+                    </div>
+                    <label class="search-box" for="expenseSearch"><span aria-hidden="true">⌕</span><input id="expenseSearch" type="search" placeholder="Search expenses..." autocomplete="off"></label>
+                </div>
+                <p id="listMessage" class="list-message" role="status" aria-live="polite"></p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th scope="col">#</th><th scope="col">Amount</th><th scope="col">Category</th><th scope="col">Date</th><th scope="col">Description</th><th scope="col" class="actions-heading">Actions</th></tr></thead>
+                        <tbody id="expenseRows"></tbody>
+                    </table>
+                    <div class="empty-state" id="emptyExpenses" hidden><span aria-hidden="true">₹</span><strong>No expenses yet</strong><p>Your expenses will appear here after you add the first one.</p></div>
+                    <div class="empty-state" id="noSearchResults" hidden><strong>No matching expenses</strong><p>Try another search term.</p></div>
+                </div>
+                <footer class="table-footer"><span id="resultCount">Showing 0 expenses</span><div class="pagination"><button id="previousPage" type="button" aria-label="Previous page" disabled>‹</button><span id="pageNumber">1</span><button id="nextPage" type="button" aria-label="Next page" disabled>›</button></div></footer>
+            </section>
+            <section class="panel expenses-panel income-list-panel" id="income-list" aria-labelledby="incomeListTitle">
+                <div class="list-heading">
+                    <div class="panel-heading compact-heading">
+                        <span class="panel-icon income-panel-icon" aria-hidden="true">↗</span>
+                        <div><h2 id="incomeListTitle">Your income</h2><p>Review and manage income entries.</p></div>
+                    </div>
+                    <label class="search-box" for="incomeSearch"><span aria-hidden="true">⌕</span><input id="incomeSearch" type="search" placeholder="Search income..." autocomplete="off"></label>
+                </div>
+                <p id="incomeListMessage" class="list-message" role="status" aria-live="polite"></p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th scope="col">#</th><th scope="col">Amount</th><th scope="col">Source</th><th scope="col">Date</th><th scope="col">Description</th><th scope="col" class="actions-heading">Actions</th></tr></thead>
+                        <tbody id="incomeRows"></tbody>
+                    </table>
+                    <div class="empty-state" id="emptyIncomes" hidden><span aria-hidden="true">↗</span><strong>No income yet</strong><p>Add an income entry to see it here.</p></div>
+                    <div class="empty-state" id="noIncomeResults" hidden><strong>No matching income</strong><p>Try another search term.</p></div>
+                </div>
+                <footer class="table-footer"><span id="incomeResultCount">Showing 0 income entries</span><div class="pagination"><button id="previousIncomePage" type="button" aria-label="Previous income page" disabled>‹</button><span id="incomePageNumber">1</span><button id="nextIncomePage" type="button" aria-label="Next income page" disabled>›</button></div></footer>
+            </section>
+            <p class="privacy-note">This local dashboard stores transactions in this project's database. Anyone who can access this app can view and change them.</p>
+        </main>
+    </div>
+
     <script>
-        const message = document.getElementById("loginMessage");
-        const logoutButton = document.getElementById("logoutButton");
+        const expenseForm = document.getElementById("expenseForm");
+        const incomeForm = document.getElementById("incomeForm");
+        const pageSize = 5;
+        const defaultExpenseCategories = ["Bills", "Education", "Entertainment", "Food", "Health", "Housing", "Other", "Personal Care", "Shopping", "Transport", "Travel"];
+        const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2 });
+        let expenseCategories = [...defaultExpenseCategories];
+        let expenses = [];
+        let incomes = [];
+        let editingExpenseId = null;
+        let editingIncomeId = null;
+        let expensePage = 1;
+        let incomePage = 1;
 
         function readCookie(name) {
             const cookie = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${name}=`));
             return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : "";
         }
 
-        fetch("/api/session/", { credentials: "same-origin" })
-            .then((response) => {
-                if (!response.ok) window.location.replace("/");
-                return response.json();
-            })
-            .then((user) => {
-                if (user.username) document.getElementById("signedInUser").textContent = user.email || user.username;
-            })
-            .catch(() => window.location.replace("/"));
+        async function request(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: "same-origin",
+                ...options,
+                headers: {
+                    "X-CSRFToken": readCookie("csrftoken"),
+                    ...(options.body ? { "Content-Type": "application/json" } : {}),
+                    ...options.headers,
+                },
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const validationError = result.errors ? Object.values(result.errors).join(" ") : "";
+                throw new Error(validationError || result.error || "Unable to complete the request.");
+            }
+            return result;
+        }
 
-        logoutButton.addEventListener("click", async () => {
-            logoutButton.disabled = true;
+        function localDateValue() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            return now.toISOString().slice(0, 10);
+        }
+
+        function formatDate(value) {
+            return new Date(`${value}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: "UTC", year: "numeric", month: "short", day: "2-digit" });
+        }
+
+        function totalCents(items) {
+            return items.reduce((sum, item) => sum + Math.round(Number(item.amount) * 100), 0);
+        }
+
+        function renderBreakdown(containerId, items, labelField, emptyMessage, denominator) {
+            const report = document.getElementById(containerId);
+            const values = new Map();
+            for (const item of items) {
+                values.set(item[labelField], (values.get(item[labelField]) || 0) + Math.round(Number(item.amount) * 100));
+            }
+            const entries = [...values.entries()].sort((left, right) => right[1] - left[1]);
+            report.replaceChildren();
+            if (!entries.length) {
+                const empty = document.createElement("p");
+                empty.className = "muted-empty";
+                empty.textContent = emptyMessage;
+                report.append(empty);
+                return;
+            }
+            for (const [label, amount] of entries.slice(0, 5)) {
+                const row = document.createElement("div");
+                row.className = "category-row";
+                const details = document.createElement("div");
+                details.className = "category-details";
+                const name = document.createElement("strong");
+                name.textContent = label;
+                const value = document.createElement("span");
+                value.textContent = currency.format(amount / 100);
+                details.append(name, value);
+                const track = document.createElement("div");
+                track.className = "category-track";
+                const bar = document.createElement("span");
+                bar.style.width = `${denominator ? Math.max(4, amount / denominator * 100) : 0}%`;
+                track.append(bar);
+                row.append(details, track);
+                report.append(row);
+            }
+        }
+
+        function updateSummary() {
+            const expenseCents = totalCents(expenses);
+            const incomeCents = totalCents(incomes);
+            const monthKey = localDateValue().slice(0, 7);
+            const monthExpenseCents = totalCents(expenses.filter((item) => item.date.startsWith(monthKey)));
+            document.getElementById("totalIncome").textContent = currency.format(incomeCents / 100);
+            document.getElementById("totalExpenses").textContent = currency.format(expenseCents / 100);
+            document.getElementById("remainingBalance").textContent = currency.format((incomeCents - expenseCents) / 100);
+            document.getElementById("incomeCount").textContent = `${incomes.length} income ${incomes.length === 1 ? "entry" : "entries"}`;
+            document.getElementById("expenseCount").textContent = `${expenses.length} expense ${expenses.length === 1 ? "entry" : "entries"}`;
+            document.getElementById("monthAmount").textContent = currency.format(monthExpenseCents / 100);
+            document.getElementById("monthDetail").textContent = new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" });
+            renderBreakdown("categoryReport", expenses, "category", "Add an expense to see your breakdown.", expenseCents);
+            renderBreakdown("incomeReport", incomes, "source", "Add income to see your breakdown.", incomeCents);
+        }
+
+        function populateCategoryOptions(selectedValue = "") {
+            const select = document.getElementById("category");
+            const query = document.getElementById("categorySearch").value.trim().toLowerCase();
+            const options = expenseCategories.filter((category) => category.toLowerCase().includes(query));
+            select.replaceChildren(new Option("Choose a category", ""));
+            for (const category of options) select.add(new Option(category, category));
+            select.value = options.includes(selectedValue) ? selectedValue : "";
+        }
+
+        function populateDatalist(listId, values) {
+            const datalist = document.getElementById(listId);
+            datalist.replaceChildren(...[...new Set(values)].sort((left, right) => left.localeCompare(right)).map((value) => new Option(value, value)));
+        }
+
+        function makeCell(row, text, className = "") {
+            const cell = document.createElement("td");
+            if (className) cell.className = className;
+            cell.textContent = text;
+            row.append(cell);
+            return cell;
+        }
+
+        function renderTransactionTable(config) {
+            const query = document.getElementById(config.searchId).value.trim().toLowerCase();
+            const filtered = config.items.filter((item) => [item[config.labelField], item.description, item.date, item.amount].some((value) => String(value).toLowerCase().includes(query)));
+            const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+            config.setPage(Math.min(config.getPage(), pageCount));
+            const page = config.getPage();
+            const start = (page - 1) * pageSize;
+            const visible = filtered.slice(start, start + pageSize);
+            const body = document.getElementById(config.bodyId);
+            body.replaceChildren();
+            document.getElementById(config.emptyId).hidden = config.items.length !== 0 || query !== "";
+            document.getElementById(config.noResultsId).hidden = config.items.length === 0 || filtered.length !== 0;
+
+            for (const [index, item] of visible.entries()) {
+                const row = document.createElement("tr");
+                makeCell(row, String(start + index + 1), "row-number");
+                makeCell(row, currency.format(Number(item.amount)), "amount-cell");
+                makeCell(row, item[config.labelField], "transaction-label-cell");
+                makeCell(row, formatDate(item.date));
+                makeCell(row, item.description || "No description", "description-cell");
+                const actions = document.createElement("td");
+                actions.className = "row-actions";
+                for (const [action, label] of [["edit", "Edit"], ["delete", "Delete"]]) {
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.className = `row-button ${action}-button`;
+                    button.dataset.action = action;
+                    button.dataset.kind = config.kind;
+                    button.dataset.id = item.id;
+                    button.textContent = label;
+                    button.setAttribute("aria-label", `${label} ${item[config.labelField]} ${config.kind}`);
+                    actions.append(button);
+                }
+                row.append(actions);
+                body.append(row);
+            }
+
+            const suffix = config.kind === "expense" ? "expenses" : "income entries";
+            document.getElementById(config.resultCountId).textContent = filtered.length
+                ? `Showing ${start + 1} to ${Math.min(start + visible.length, filtered.length)} of ${filtered.length} ${suffix}`
+                : `Showing 0 of ${config.items.length} ${suffix}`;
+            document.getElementById(config.pageNumberId).textContent = String(page);
+            document.getElementById(config.previousId).disabled = page <= 1;
+            document.getElementById(config.nextId).disabled = page >= pageCount;
+        }
+
+        function renderExpenses() {
+            renderTransactionTable({
+                kind: "expense", items: expenses, labelField: "category", searchId: "expenseSearch", bodyId: "expenseRows",
+                emptyId: "emptyExpenses", noResultsId: "noSearchResults", resultCountId: "resultCount", pageNumberId: "pageNumber",
+                previousId: "previousPage", nextId: "nextPage", getPage: () => expensePage, setPage: (value) => { expensePage = value; },
+            });
+        }
+
+        function renderIncomes() {
+            renderTransactionTable({
+                kind: "income", items: incomes, labelField: "source", searchId: "incomeSearch", bodyId: "incomeRows",
+                emptyId: "emptyIncomes", noResultsId: "noIncomeResults", resultCountId: "incomeResultCount", pageNumberId: "incomePageNumber",
+                previousId: "previousIncomePage", nextId: "nextIncomePage", getPage: () => incomePage, setPage: (value) => { incomePage = value; },
+            });
+        }
+
+        async function refreshDashboard() {
+            const [expenseResult, incomeResult] = await Promise.all([request("/api/expenses/"), request("/api/incomes/")]);
+            expenses = expenseResult.expenses;
+            incomes = incomeResult.incomes;
+            expenseCategories = [...new Set([...defaultExpenseCategories, ...expenseResult.categories])].sort((left, right) => left.localeCompare(right));
+            populateCategoryOptions(document.getElementById("category").value);
+            populateDatalist("incomeSources", ["Freelance", "Gift", "Investment", "Other", "Salary", ...incomeResult.sources]);
+            updateSummary();
+            renderExpenses();
+            renderIncomes();
+        }
+
+        function resetExpenseForm() {
+            expenseForm.reset();
+            document.getElementById("categorySearch").value = "";
+            populateCategoryOptions();
+            document.getElementById("expenseDate").value = localDateValue();
+            editingExpenseId = null;
+            document.getElementById("formTitle").textContent = "Add expense";
+            document.getElementById("saveExpense").textContent = "Save expense";
+            document.getElementById("cancelEdit").hidden = true;
+            document.getElementById("formMessage").textContent = "";
+        }
+
+        function resetIncomeForm() {
+            incomeForm.reset();
+            document.getElementById("incomeDate").value = localDateValue();
+            editingIncomeId = null;
+            document.getElementById("incomeFormTitle").textContent = "Add income";
+            document.getElementById("saveIncome").textContent = "Save income";
+            document.getElementById("cancelIncomeEdit").hidden = true;
+            document.getElementById("incomeMessage").textContent = "";
+        }
+
+        expenseForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const message = document.getElementById("formMessage");
+            message.textContent = "";
+            if (!expenseForm.reportValidity()) return;
+            const data = new FormData(expenseForm);
+            const payload = Object.fromEntries(["amount", "category", "date", "description"].map((key) => [key, data.get(key)]));
+            const button = document.getElementById("saveExpense");
+            const wasEditing = editingExpenseId !== null;
+            button.disabled = true;
             try {
-                const response = await fetch("/api/logout/", {
-                    method: "POST",
-                    credentials: "same-origin",
-                    headers: { "X-CSRFToken": readCookie("csrftoken") },
+                await request(editingExpenseId ? `/api/expenses/${editingExpenseId}/` : "/api/expenses/", {
+                    method: editingExpenseId ? "PATCH" : "POST", body: JSON.stringify(payload),
                 });
-                if (!response.ok) throw new Error("Logout failed");
-                window.location.replace("/");
-            } catch {
-                message.textContent = "Unable to log out. Please try again.";
-                logoutButton.disabled = false;
+                if (wasEditing) document.getElementById("expenseSearch").value = "";
+                resetExpenseForm();
+                await refreshDashboard();
+                message.textContent = "Expense saved.";
+            } catch (error) {
+                message.textContent = error.message;
+            } finally {
+                button.disabled = false;
             }
         });
+
+        incomeForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const message = document.getElementById("incomeMessage");
+            message.textContent = "";
+            if (!incomeForm.reportValidity()) return;
+            const data = new FormData(incomeForm);
+            const payload = Object.fromEntries(["amount", "source", "date", "description"].map((key) => [key, data.get(key)]));
+            const button = document.getElementById("saveIncome");
+            const wasEditing = editingIncomeId !== null;
+            button.disabled = true;
+            try {
+                await request(editingIncomeId ? `/api/incomes/${editingIncomeId}/` : "/api/incomes/", {
+                    method: editingIncomeId ? "PATCH" : "POST", body: JSON.stringify(payload),
+                });
+                if (wasEditing) document.getElementById("incomeSearch").value = "";
+                resetIncomeForm();
+                await refreshDashboard();
+                message.textContent = "Income saved.";
+            } catch (error) {
+                message.textContent = error.message;
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        document.getElementById("cancelEdit").addEventListener("click", resetExpenseForm);
+        document.getElementById("cancelIncomeEdit").addEventListener("click", resetIncomeForm);
+        document.getElementById("categorySearch").addEventListener("input", () => {
+            populateCategoryOptions(document.getElementById("category").value);
+        });
+        document.getElementById("expenseSearch").addEventListener("input", () => { expensePage = 1; renderExpenses(); });
+        document.getElementById("incomeSearch").addEventListener("input", () => { incomePage = 1; renderIncomes(); });
+        document.getElementById("previousPage").addEventListener("click", () => { expensePage -= 1; renderExpenses(); });
+        document.getElementById("nextPage").addEventListener("click", () => { expensePage += 1; renderExpenses(); });
+        document.getElementById("previousIncomePage").addEventListener("click", () => { incomePage -= 1; renderIncomes(); });
+        document.getElementById("nextIncomePage").addEventListener("click", () => { incomePage += 1; renderIncomes(); });
+
+        document.querySelectorAll("[data-scroll-to]").forEach((button) => button.addEventListener("click", () => {
+            const target = document.getElementById(button.dataset.scrollTo);
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (button.dataset.scrollTo === "expense-form") { resetExpenseForm(); document.getElementById("amount").focus(); }
+            if (button.dataset.scrollTo === "income-form") { resetIncomeForm(); document.getElementById("incomeAmount").focus(); }
+        }));
+        document.querySelectorAll(".nav-link").forEach((link) => link.addEventListener("click", () => {
+            document.querySelectorAll(".nav-link").forEach((item) => { item.classList.remove("active"); item.removeAttribute("aria-current"); });
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+        }));
+
+        async function handleTransactionAction(event, kind) {
+            const button = event.target.closest("button[data-action]");
+            if (!button) return;
+            const id = button.dataset.id;
+            const isExpense = kind === "expense";
+            const listMessage = document.getElementById(isExpense ? "listMessage" : "incomeListMessage");
+            const formMessage = document.getElementById(isExpense ? "formMessage" : "incomeMessage");
+            const formId = isExpense ? "expense-form" : "income-form";
+            const endpoint = isExpense ? "expenses" : "incomes";
+            const labelField = isExpense ? "category" : "source";
+            if (button.dataset.action === "edit") {
+                try {
+                    const result = await request(`/api/${endpoint}/${id}/`);
+                    const item = result[isExpense ? "expense" : "income"];
+                    if (isExpense) {
+                        document.getElementById("categorySearch").value = "";
+                        populateCategoryOptions(item.category);
+                    }
+                    document.getElementById(isExpense ? "amount" : "incomeAmount").value = item.amount;
+                    document.getElementById(isExpense ? "category" : "incomeSource").value = item[labelField];
+                    document.getElementById(isExpense ? "expenseDate" : "incomeDate").value = item.date;
+                    document.getElementById(isExpense ? "description" : "incomeDescription").value = item.description;
+                    if (isExpense) {
+                        editingExpenseId = item.id;
+                        document.getElementById("formTitle").textContent = "Edit expense";
+                        document.getElementById("saveExpense").textContent = "Update expense";
+                        document.getElementById("cancelEdit").hidden = false;
+                    } else {
+                        editingIncomeId = item.id;
+                        document.getElementById("incomeFormTitle").textContent = "Edit income";
+                        document.getElementById("saveIncome").textContent = "Update income";
+                        document.getElementById("cancelIncomeEdit").hidden = false;
+                    }
+                    document.getElementById(formId).scrollIntoView({ behavior: "smooth", block: "start" });
+                    document.getElementById(isExpense ? "amount" : "incomeAmount").focus();
+                } catch (error) {
+                    listMessage.textContent = error.message;
+                }
+                return;
+            }
+            if (!window.confirm(`Delete this ${kind}? This action cannot be undone.`)) return;
+            button.disabled = true;
+            try {
+                await request(`/api/${endpoint}/${id}/`, { method: "DELETE" });
+                if (String(isExpense ? editingExpenseId : editingIncomeId) === id) {
+                    if (isExpense) resetExpenseForm(); else resetIncomeForm();
+                }
+                formMessage.textContent = `${kind[0].toUpperCase()}${kind.slice(1)} deleted.`;
+                await refreshDashboard();
+            } catch (error) {
+                listMessage.textContent = error.message;
+                button.disabled = false;
+            }
+        }
+
+        document.getElementById("expenseRows").addEventListener("click", (event) => handleTransactionAction(event, "expense"));
+        document.getElementById("incomeRows").addEventListener("click", (event) => handleTransactionAction(event, "income"));
+        document.getElementById("todayLabel").textContent = new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+        resetExpenseForm();
+        resetIncomeForm();
+        refreshDashboard().catch((error) => { document.getElementById("listMessage").textContent = error.message; });
     </script>
 </body>
 </html>

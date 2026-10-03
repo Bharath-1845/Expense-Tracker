@@ -17,18 +17,26 @@ Including another URLconf
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
-from django.urls import path
 from tasks import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.login_page, name='login'),
+    path('', views.ledger_page, {'page': 'dashboard'}, name='home'),
     path('login/', views.login_page, name='login-page'),
     path('login-page/<path:filename>', views.login_asset, name='login-asset'),
     path('api/login/', views.login_api, name='login-api'),
     path('api/logout/', views.logout_api, name='logout-api'),
     path('api/session/', views.session_api, name='session-api'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('api/expenses/', views.expenses_api, name='expenses-api'),
+    path('api/expenses/<int:expense_id>/', views.expense_detail_api, name='expense-detail-api'),
+    path('api/incomes/', views.incomes_api, name='incomes-api'),
+    path('api/incomes/<int:income_id>/', views.income_detail_api, name='income-detail-api'),
+    path('dashboard/', views.ledger_page, {'page': 'dashboard'}, name='dashboard'),
+    path('expenses/add/', views.ledger_page, {'page': 'expense_add'}, name='expense-add'),
+    path('expenses/', views.ledger_page, {'page': 'expenses'}, name='expense-list'),
+    path('income/add/', views.ledger_page, {'page': 'income_add'}, name='income-add'),
+    path('income/', views.ledger_page, {'page': 'incomes'}, name='income-list'),
+    path('reports/', views.ledger_page, {'page': 'reports'}, name='reports'),
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(
