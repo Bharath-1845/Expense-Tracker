@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#142b4a">
     <title>{% block title %}Expense Manager{% endblock %}</title>
-    <link rel="stylesheet" href="/login-page/style.css">
+    <link rel="stylesheet" href="{% static 'login-page/style.css' %}">
+      <link rel="stylesheet" href="{% static 'tasks/app.css' %}">
 </head>
 <body class="ledger-app" data-page="{{ active_page }}">
     <aside class="ledger-sidebar">
@@ -38,6 +40,7 @@
             <p class="privacy-note">Transactions are stored in this project's database. Anyone with access to this app can view and change them.</p>
         </main>
     </div>
-    <script src="/login-page/ledger.js" defer></script>
+    <script src="{% static 'login-page/ledger.js' %}" defer></script>
+    <script src="{% static 'tasks/ledger.js' %}"></script>
 </body>
 </html>

@@ -6,16 +6,24 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
-
+#from django.views.generic.base import RedirectView
 from .models import Expense, Income
 
 
 LOGIN_PAGE = settings.BASE_DIR / 'login-page' / 'index.html'
 DASHBOARD_PAGE = settings.BASE_DIR / 'login-page' / 'dashboard.html'
 
+LEDGER_TEMPLATES = {
+    'dashboard': 'ledger/dashboard.html',
+    'expense_add': 'ledger/expense_add.html',
+    'expenses': 'ledger/expenses.html',
+    'income_add': 'ledger/income_add.html',
+    'incomes': 'ledger/incomes.html',
+    'reports': 'ledger/reports.html',
+}
 
 @require_GET
 @ensure_csrf_cookie

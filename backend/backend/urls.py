@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 from django.urls import path
+from django.views.generic.base import RedirectView
 from tasks import views
 
 urlpatterns = [
