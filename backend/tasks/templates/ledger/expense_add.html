@@ -1,0 +1,17 @@
+{% extends 'ledger/base.html' %}
+{% block title %}Add Expense | Expense Manager{% endblock %}
+{% block content %}
+<section class="welcome-row"><div><p class="eyebrow">EXPENSE MANAGEMENT</p><h1>Add expense</h1><p class="welcome-copy">Record a purchase or bill in your ledger.</p></div><a class="button-quiet" href="{% url 'expense-list' %}">View expenses</a></section>
+<section class="panel editor-panel page-editor" aria-labelledby="expenseAddTitle">
+    <div class="panel-heading"><span class="panel-icon edit-icon" aria-hidden="true">＋</span><div><h2 id="expenseAddTitle">Expense details</h2><p>Enter the amount, category, and date.</p></div></div>
+    <form id="expenseForm" data-kind="expense" data-mode="create" novalidate>
+        <div class="form-grid">
+            <div class="field-group"><label for="expenseAmount">Amount (₹)</label><div class="input-with-icon"><span aria-hidden="true">₹</span><input id="expenseAmount" name="amount" type="number" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" placeholder="0.00" required></div></div>
+            <div class="field-group"><label for="expenseCategory">Category</label><div class="category-picker"><input id="expenseCategorySearch" class="category-search" type="search" placeholder="Find a category..." autocomplete="off" aria-label="Search expense categories"><div class="input-with-icon"><span aria-hidden="true">▦</span><select id="expenseCategory" name="category" required><option value="">Choose a category</option></select></div></div></div>
+            <div class="field-group"><label for="expenseDate">Date</label><div class="input-with-icon"><span aria-hidden="true">▦</span><input id="expenseDate" name="date" type="date" required></div></div>
+            <div class="field-group description-field"><label for="expenseDescription">Description <span>OPTIONAL</span></label><textarea id="expenseDescription" name="description" rows="3" maxlength="1000" placeholder="Add a note about this expense"></textarea></div>
+        </div>
+        <p id="expenseFormMessage" class="form-message" role="status" aria-live="polite"></p><div class="form-actions"><button class="button-primary" type="submit">Save expense</button><button class="button-quiet" type="reset">Clear form</button></div>
+    </form>
+</section>
+{% endblock %}
