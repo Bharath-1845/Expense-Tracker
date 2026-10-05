@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-t#ovc!jv70cth3znz=#tm0(%o73-@j$a4&&zhvrp4^dnwl1xu%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '[::1]']
 
 
 # Application definition
@@ -123,3 +123,4 @@ STATIC_URL = 'static/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'Expense Manager <no-reply@localhost>'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
