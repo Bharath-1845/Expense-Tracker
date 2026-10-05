@@ -1,0 +1,17 @@
+{% extends 'ledger/base.html' %}
+{% block title %}Add Income | Expense Manager{% endblock %}
+{% block content %}
+<section class="welcome-row"><div><p class="eyebrow">INCOME MANAGEMENT</p><h1>Add income</h1><p class="welcome-copy">Record money received and update your available balance.</p></div><a class="button-quiet" href="{% url 'income-list' %}">View income</a></section>
+<section class="panel editor-panel page-editor income-editor" aria-labelledby="incomeAddTitle">
+    <div class="panel-heading"><span class="panel-icon income-panel-icon" aria-hidden="true">↗</span><div><h2 id="incomeAddTitle">Income details</h2><p>Enter an amount, source, and date.</p></div></div>
+    <form id="incomeForm" data-kind="income" data-mode="create" novalidate>
+        <div class="form-grid">
+            <div class="field-group"><label for="incomeAmount">Amount (₹)</label><div class="input-with-icon"><span aria-hidden="true">₹</span><input id="incomeAmount" name="amount" type="number" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" placeholder="0.00" required></div></div>
+            <div class="field-group"><label for="incomeSource">Source / category</label><div class="category-picker"><input id="incomeSourceSearch" class="category-search" type="search" placeholder="Find an income source..." autocomplete="off" aria-label="Search income sources"><div class="input-with-icon"><span aria-hidden="true">↗</span><select id="incomeSource" name="source" required><option value="">Choose a source</option></select></div></div></div>
+            <div class="field-group"><label for="incomeDate">Date</label><div class="input-with-icon"><span aria-hidden="true">▦</span><input id="incomeDate" name="date" type="date" required></div></div>
+            <div class="field-group description-field"><label for="incomeDescription">Description <span>OPTIONAL</span></label><textarea id="incomeDescription" name="description" rows="3" maxlength="1000" placeholder="Add a note about this income"></textarea></div>
+        </div>
+        <p id="incomeFormMessage" class="form-message" role="status" aria-live="polite"></p><div class="form-actions"><button class="button-primary income-save-button" type="submit">Save income</button><button class="button-quiet" type="reset">Clear form</button></div>
+    </form>
+</section>
+{% endblock %}

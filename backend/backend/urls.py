@@ -17,10 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
-from django.urls import path
+from django.views.generic.base import RedirectView
 from tasks import views
 
 urlpatterns = [
+    path(
+        'admin/password_reset/',
+        RedirectView.as_view(pattern_name='password-reset', permanent=False),
+        name='admin-password-reset-redirect',
+    ),
     path('admin/', admin.site.urls),
     path('', views.login_page, name='login'),
     path('login/', views.login_page, name='login-page'),
@@ -31,13 +36,21 @@ urlpatterns = [
     path('api/budget/', views.budget_api, name='budget-api'),
     path('api/expenses/', views.expenses_api, name='expenses-api'),
     path('api/expenses/<int:expense_id>/', views.expense_detail_api, name='expense-detail-api'),
+    path('api/incomes/', views.incomes_api, name='incomes-api'),
+    path('api/incomes/<int:income_id>/', views.income_detail_api, name='income-detail-api'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('ledger/', views.ledger_page, {'page': 'dashboard'}, name='home'),
+    path('expenses/add/', views.ledger_page, {'page': 'expense_add'}, name='expense-add'),
+    path('expenses/', views.ledger_page, {'page': 'expenses'}, name='expense-list'),
+    path('income/add/', views.ledger_page, {'page': 'income_add'}, name='income-add'),
+    path('income/', views.ledger_page, {'page': 'incomes'}, name='income-list'),
+    path('reports/', views.ledger_page, {'page': 'reports'}, name='reports'),
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(
-            template_name='registration/password_reset_form.html',
-            email_template_name='registration/password_reset_email.txt',
-            subject_template_name='registration/password_reset_subject.txt',
+            template_name='tasks/password_reset/form.html',
+            email_template_name='tasks/password_reset/email.txt',
+            subject_template_name='tasks/password_reset/subject.txt',
             success_url=reverse_lazy('password-reset-done'),
         ),
         name='password-reset',
@@ -45,14 +58,14 @@ urlpatterns = [
     path(
         'password-reset/done/',
         auth_views.PasswordResetDoneView.as_view(
-            template_name='registration/password_reset_done.html',
+            template_name='tasks/password_reset/done.html',
         ),
         name='password-reset-done',
     ),
     path(
         'reset/<uidb64>/<token>/',
         auth_views.PasswordResetConfirmView.as_view(
-            template_name='registration/password_reset_confirm.html',
+            template_name='tasks/password_reset/confirm.html',
             success_url=reverse_lazy('password-reset-complete'),
         ),
         name='password-reset-confirm',
@@ -60,7 +73,7 @@ urlpatterns = [
     path(
         'reset/done/',
         auth_views.PasswordResetCompleteView.as_view(
-            template_name='registration/password_reset_complete.html',
+            template_name='tasks/password_reset/complete.html',
         ),
         name='password-reset-complete',
     ),

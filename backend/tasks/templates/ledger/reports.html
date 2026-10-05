@@ -1,0 +1,16 @@
+{% extends 'ledger/base.html' %}
+{% block title %}Reports | Expense Manager{% endblock %}
+{% block content %}
+<section class="welcome-row"><div><p class="eyebrow">FINANCIAL OVERVIEW</p><h1>Reports</h1><p class="welcome-copy">Current summaries from all saved income and expense records.</p></div></section>
+<section class="summary-grid report-summary-grid" aria-label="Financial totals">
+    <article class="summary-card"><div class="summary-label"><span class="summary-icon income-icon">↗</span>Total income</div><p class="summary-value" id="totalIncome">₹0.00</p></article>
+    <article class="summary-card"><div class="summary-label"><span class="summary-icon expense-icon">↘</span>Total expenses</div><p class="summary-value" id="totalExpenses">₹0.00</p></article>
+    <article class="summary-card"><div class="summary-label"><span class="summary-icon balance-icon">＝</span>Remaining balance</div><p class="summary-value" id="remainingBalance">₹0.00</p></article>
+    <article class="summary-card"><div class="summary-label"><span class="summary-icon month-icon">◷</span>This month spent</div><p class="summary-value" id="monthAmount">₹0.00</p><p class="summary-detail" id="monthDetail"></p></article>
+</section>
+<section class="report-grid">
+    <article class="panel report-panel"><div class="panel-heading"><span class="panel-icon report-icon" aria-hidden="true">↘</span><div><h2>Expenses by category</h2><p>Category totals and share of total spending.</p></div></div><div id="categoryReport" class="category-report"></div></article>
+    <article class="panel report-panel"><div class="panel-heading"><span class="panel-icon income-panel-icon" aria-hidden="true">↗</span><div><h2>Income by source</h2><p>Income totals grouped by source.</p></div></div><div id="incomeReport" class="category-report"></div></article>
+</section>
+<section class="panel expenses-panel report-transactions"><div class="panel-heading compact-heading"><span class="panel-icon list-icon" aria-hidden="true">☷</span><div><h2>Latest transactions</h2><p>Recent activity used in these reports.</p></div></div><div class="table-wrap"><table><thead><tr><th>Type</th><th>Category / source</th><th>Date</th><th>Amount</th></tr></thead><tbody id="reportTransactions"></tbody></table><div class="empty-state" id="reportTransactionsEmpty" hidden><strong>No transactions to report</strong><p>Add income or expenses to build your report.</p></div></div></section>
+{% endblock %}

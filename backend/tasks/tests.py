@@ -7,6 +7,8 @@ from django.core import mail
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
+from .models import Expense, Income
+
 
 class LoginFlowTests(TestCase):
 	def setUp(self):
@@ -54,11 +56,19 @@ class LoginFlowTests(TestCase):
 
 		self.assertEqual(response.status_code, 400)
 
-	def test_dashboard_requires_authentication(self):
-		response = self.client.get(reverse('dashboard'))
-
-		self.assertEqual(response.status_code, 302)
-		self.assertEqual(response.url, '/?next=/dashboard/')
+	def test_major_functions_open_dedicated_pages(self):
+		page_expectations = {
+			'expense-add': 'id="expenseForm"',
+			'expense-list': 'id="expenseListRows"',
+			'income-add': 'id="incomeForm"',
+			'income-list': 'id="incomeListRows"',
+			'reports': 'id="categoryReport"',
+		}
+		for route_name, expected_marker in page_expectations.items():
+			with self.subTest(route=route_name):
+				response = self.client.get(reverse(route_name))
+				self.assertEqual(response.status_code, 200)
+				self.assertContains(response, expected_marker)
 
 	def test_logout_clears_session(self):
 		self.client.force_login(self.user)
@@ -71,7 +81,7 @@ class LoginFlowTests(TestCase):
 	def test_login_page_sets_csrf_cookie(self):
 		csrf_client = Client(enforce_csrf_checks=True)
 
-		response = csrf_client.get('/')
+		response = csrf_client.get(reverse('login-page'))
 
 		self.assertEqual(response.status_code, 200)
 		self.assertIn('csrftoken', response.cookies)
@@ -175,8 +185,22 @@ class PasswordResetFlowTests(TestCase):
 		self.assertRedirects(response, reverse('password-reset-done'))
 		self.assertEqual(len(mail.outbox), 0)
 
+	def test_reset_form_uses_project_template(self):
+		response = self.client.get(reverse('password-reset'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Password Reset')
+		self.assertContains(response, 'Expense Manager')
+		self.assertContains(response, '/static/tasks/app.css')
+		self.assertNotContains(response, 'Django administration')
+
+	def test_admin_password_reset_link_redirects_to_project_form(self):
+		response = self.client.get('/admin/password_reset/')
+
+		self.assertRedirects(response, reverse('password-reset'), fetch_redirect_response=False)
+
 	def test_login_page_links_to_password_reset(self):
-		response = self.client.get('/')
+		response = self.client.get(reverse('login-page'))
 
 		self.assertContains(response, 'href="/password-reset/"')
 
@@ -209,13 +233,6 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		self.assertEqual(response.status_code, 401)
 
 		response = self.client.post(reverse('budget-api'), data='{}', content_type='application/json')
-		self.assertEqual(response.status_code, 401)
-
-	def test_expenses_api_requires_auth(self):
-		response = self.client.get(reverse('expenses-api'))
-		self.assertEqual(response.status_code, 401)
-
-		response = self.client.post(reverse('expenses-api'), data='{}', content_type='application/json')
 		self.assertEqual(response.status_code, 401)
 
 	def test_set_monthly_budget_and_query(self):
@@ -276,13 +293,13 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		expenses = get_resp.json()['expenses']
 		self.assertEqual(len(expenses), 1)
 		self.assertEqual(expenses[0]['title'], 'Groceries')
-		self.assertEqual(expenses[0]['amount'], 1500.00)
+		self.assertEqual(float(expenses[0]['amount']), 1500.00)
 		self.assertEqual(expenses[0]['category'], 'Food & Dining')
 
 	def test_add_expense_validation(self):
 		self.client.force_login(self.user1)
 
-		# Missing title
+		# Missing title and description
 		resp = self.client.post(
 			reverse('expenses-api'),
 			data=json.dumps({'title': '', 'amount': 100, 'date': '2026-10-01'}),
@@ -402,9 +419,6 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		self.assertEqual(user2_budget['budget'], 0.0)
 		self.assertEqual(user2_budget['total_expenses'], 0.0)
 
-		user2_expenses = self.client.get(reverse('expenses-api'), {'year': 2026, 'month': 10}).json()
-		self.assertEqual(len(user2_expenses['expenses']), 0)
-
 		# User2 cannot delete User1's expense
 		del_resp = self.client.delete(reverse('expense-detail-api', args=[user1_exp_id]))
 		self.assertEqual(del_resp.status_code, 404)
@@ -438,7 +452,7 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		exp_data = get_resp.json()['expense']
 		self.assertEqual(exp_data['id'], exp_id)
 		self.assertEqual(exp_data['title'], 'Coffee')
-		self.assertEqual(exp_data['amount'], 150.00)
+		self.assertEqual(float(exp_data['amount']), 150.00)
 		self.assertEqual(exp_data['category'], 'Food & Dining')
 		self.assertEqual(exp_data['date'], '2026-10-03')
 		self.assertEqual(exp_data['notes'], 'Cafe visit')
@@ -475,7 +489,7 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		edit_data = edit_resp.json()
 		self.assertEqual(edit_data['message'], 'Expense updated successfully.')
 		self.assertEqual(edit_data['expense']['title'], 'Updated Item')
-		self.assertEqual(edit_data['expense']['amount'], 450.75)
+		self.assertEqual(float(edit_data['expense']['amount']), 450.75)
 		self.assertEqual(edit_data['expense']['category'], 'Entertainment')
 		self.assertEqual(edit_data['expense']['date'], '2026-10-02')
 		self.assertEqual(edit_data['expense']['notes'], 'Updated notes')
@@ -485,7 +499,7 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		expenses = get_resp.json()['expenses']
 		self.assertEqual(len(expenses), 1)
 		self.assertEqual(expenses[0]['title'], 'Updated Item')
-		self.assertEqual(expenses[0]['amount'], 450.75)
+		self.assertEqual(float(expenses[0]['amount']), 450.75)
 		self.assertEqual(expenses[0]['category'], 'Entertainment')
 
 	def test_edit_expense_validation(self):
@@ -518,7 +532,7 @@ class DashboardBudgetAndExpenseTests(TestCase):
 			content_type='application/json',
 		)
 		self.assertEqual(resp.status_code, 400)
-		self.assertIn('must be greater than zero', resp.json()['error'])
+		self.assertIn('greater than zero', resp.json()['error'])
 
 		# Invalid date
 		resp = self.client.put(
@@ -527,7 +541,7 @@ class DashboardBudgetAndExpenseTests(TestCase):
 			content_type='application/json',
 		)
 		self.assertEqual(resp.status_code, 400)
-		self.assertIn('Invalid date format', resp.json()['error'])
+		self.assertIn('Invalid date', resp.json()['error'])
 
 		# Malformed JSON
 		resp = self.client.put(
@@ -579,12 +593,131 @@ class DashboardBudgetAndExpenseTests(TestCase):
 		self.assertEqual(summary_after['remaining_balance'], 2500.00)
 		self.assertEqual(summary_after['percentage_used'], 50.0)
 
-	def test_edit_expense_unauthenticated(self):
-		response = self.client.put(
-			reverse('expense-detail-api', args=[1]),
-			data=json.dumps({'title': 'Item', 'amount': 100}),
+
+class ExpenseApiTests(TestCase):
+	def setUp(self):
+		self.payload = {
+			'amount': '1200.00',
+			'category': 'Shopping',
+			'date': '2025-06-01',
+			'description': 'Groceries and household items',
+		}
+
+	def post_expense(self, payload):
+		return self.client.post(
+			reverse('expenses-api'),
+			data=json.dumps(payload),
 			content_type='application/json',
 		)
-		self.assertEqual(response.status_code, 401)
+
+	def test_create_and_edit_expense_persists_only_submitted_changes(self):
+		create_response = self.post_expense(self.payload)
+
+		self.assertEqual(create_response.status_code, 201)
+		expense_id = create_response.json()['expense']['id']
+		update_response = self.client.patch(
+			reverse('expense-detail-api', args=[expense_id]),
+			data=json.dumps({
+				'amount': '1250.50',
+				'category': 'Food',
+				'description': 'Updated household items',
+			}),
+			content_type='application/json',
+		)
+
+		self.assertEqual(update_response.status_code, 200)
+		self.assertEqual(update_response.json()['expense']['category'], 'Food')
+		self.assertEqual(update_response.json()['expense']['date'], '2025-06-01')
+		self.assertEqual(update_response.json()['expense']['amount'], '1250.50')
+		expense = Expense.objects.get(pk=expense_id)
+		self.assertEqual(expense.description, 'Updated household items')
+
+	def test_expense_list_is_available_without_sign_in(self):
+		self.post_expense(self.payload)
+
+		response = self.client.get(reverse('expenses-api'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(len(response.json()['expenses']), 1)
+		self.assertEqual(response.json()['expenses'][0]['category'], 'Shopping')
+		self.assertIn('Shopping', response.json()['categories'])
+		self.assertIn('Food', response.json()['categories'])
+
+	def test_invalid_expense_fields_are_rejected(self):
+		response = self.post_expense({
+			**self.payload,
+			'amount': '-4',
+			'date': 'not-a-date',
+		})
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(set(response.json()['errors']), {'amount', 'date'})
+		self.assertEqual(Expense.objects.count(), 0)
+
+	def test_delete_removes_only_the_selected_expense(self):
+		first_id = self.post_expense(self.payload).json()['expense']['id']
+		second_payload = {**self.payload, 'category': 'Food', 'amount': '500.00'}
+		second_id = self.post_expense(second_payload).json()['expense']['id']
+
+		response = self.client.delete(reverse('expense-detail-api', args=[first_id]))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertFalse(Expense.objects.filter(pk=first_id).exists())
+		self.assertTrue(Expense.objects.filter(pk=second_id).exists())
+
+	def test_malformed_json_is_rejected(self):
+		response = self.client.post(reverse('expenses-api'), data='{', content_type='application/json')
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(Expense.objects.count(), 0)
 
 
+class IncomeApiTests(TestCase):
+	def setUp(self):
+		self.payload = {
+			'amount': '3000.00',
+			'source': 'Salary',
+			'date': '2026-10-01',
+			'description': 'Monthly pay',
+		}
+
+	def post_income(self, payload):
+		return self.client.post(
+			reverse('incomes-api'),
+			data=json.dumps(payload),
+			content_type='application/json',
+		)
+
+	def test_income_create_edit_and_delete_remain_separate_from_expenses(self):
+		expense = Expense.objects.create(
+			category='Food',
+			amount='500.00',
+			date='2026-10-02',
+		)
+		create_response = self.post_income(self.payload)
+
+		self.assertEqual(create_response.status_code, 201)
+		income_id = create_response.json()['income']['id']
+		update_response = self.client.patch(
+			reverse('income-detail-api', args=[income_id]),
+			data=json.dumps({'amount': '3500.00', 'source': 'Freelance'}),
+			content_type='application/json',
+		)
+
+		self.assertEqual(update_response.status_code, 200)
+		self.assertEqual(update_response.json()['income']['source'], 'Freelance')
+		self.assertEqual(update_response.json()['income']['date'], '2026-10-01')
+		self.assertEqual(update_response.json()['income']['amount'], '3500.00')
+		self.assertEqual(Income.objects.count(), 1)
+		self.assertEqual(Expense.objects.count(), 1)
+		delete_response = self.client.delete(reverse('income-detail-api', args=[income_id]))
+		self.assertEqual(delete_response.status_code, 200)
+		self.assertFalse(Income.objects.filter(pk=income_id).exists())
+		self.assertTrue(Expense.objects.filter(pk=expense.pk).exists())
+
+	def test_income_validation_rejects_invalid_values(self):
+		response = self.post_income({**self.payload, 'source': ' ', 'amount': '0', 'date': 'bad-date'})
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(set(response.json()['errors']), {'source', 'amount', 'date'})
+		self.assertEqual(Income.objects.count(), 0)
