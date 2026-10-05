@@ -541,7 +541,7 @@ class DashboardBudgetAndExpenseTests(TestCase):
 			content_type='application/json',
 		)
 		self.assertEqual(resp.status_code, 400)
-		self.assertIn('Invalid date', resp.json()['error'])
+		self.assertIn('valid date', resp.json()['error'])
 
 		# Malformed JSON
 		resp = self.client.put(
