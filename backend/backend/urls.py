@@ -28,6 +28,9 @@ urlpatterns = [
     path('api/login/', views.login_api, name='login-api'),
     path('api/logout/', views.logout_api, name='logout-api'),
     path('api/session/', views.session_api, name='session-api'),
+    path('api/budget/', views.budget_api, name='budget-api'),
+    path('api/expenses/', views.expenses_api, name='expenses-api'),
+    path('api/expenses/<int:expense_id>/', views.expense_detail_api, name='expense-detail-api'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path(
         'password-reset/',
