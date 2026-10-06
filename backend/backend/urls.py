@@ -24,44 +24,22 @@ urlpatterns = [
     path('', views.login_page, name='login'),
 
     path('login/', views.login_page, name='login-page'),
-
-    path(
-        'login-page/<path:filename>',
-        views.login_asset,
-        name='login-asset'
-    ),
-
-    path(
-        'api/login/',
-        views.login_api,
-        name='login-api'
-    ),
-
-    path(
-        'api/logout/',
-        views.logout_api,
-        name='logout-api'
-    ),
-
-    path(
-        'api/session/',
-        views.session_api,
-        name='session-api'
-    ),
-
-    path(
-        'dashboard/',
-        views.dashboard,
-        name='dashboard'
-    ),
-
-    # Add Income
-    path(
-        'income/add/',
-        views.add_income,
-        name='add_income'
-    ),
-
+    path('login-page/<path:filename>', views.login_asset, name='login-asset'),
+    path('api/login/', views.login_api, name='login-api'),
+    path('api/logout/', views.logout_api, name='logout-api'),
+    path('api/session/', views.session_api, name='session-api'),
+    path('api/budget/', views.budget_api, name='budget-api'),
+    path('api/expenses/', views.expenses_api, name='expenses-api'),
+    path('api/expenses/<int:expense_id>/', views.expense_detail_api, name='expense-detail-api'),
+    path('api/incomes/', views.incomes_api, name='incomes-api'),
+    path('api/incomes/<int:income_id>/', views.income_detail_api, name='income-detail-api'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('ledger/', views.ledger_page, {'page': 'dashboard'}, name='home'),
+    path('expenses/add/', views.ledger_page, {'page': 'expense_add'}, name='expense-add'),
+    path('expenses/', views.ledger_page, {'page': 'expenses'}, name='expense-list'),
+    path('income/add/', views.ledger_page, {'page': 'income_add'}, name='income-add'),
+    path('income/', views.ledger_page, {'page': 'incomes'}, name='income-list'),
+    path('reports/', views.ledger_page, {'page': 'reports'}, name='reports'),
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(

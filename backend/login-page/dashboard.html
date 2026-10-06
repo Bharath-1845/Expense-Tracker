@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager - Dashboard</title>
+    <link rel="stylesheet" href="/login-page/style.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Top Navigation Bar -->
+    <header class="dashboard-header">
+        <nav class="dashboard-nav">
+            <div class="nav-brand">
+                <div class="nav-logo" aria-hidden="true">💰</div>
+                <div class="nav-title">Expense Manager</div>
+            </div>
+            <div class="nav-user-actions">
+                <div class="user-badge" id="userBadge">
+                    <span aria-hidden="true">👤</span>
+                    <span id="signedInUser">Loading...</span>
+                </div>
+                <button type="button" class="btn-logout" id="logoutButton">Log out</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="dashboard-container">
+
+        <!-- Month Navigation Bar -->
+        <section class="filter-bar" aria-label="Month selection">
+            <div class="filter-title">
+                <span>📅</span>
+                <span>Monthly Overview: <strong class="selectedMonthLabel">...</strong></span>
+            </div>
+            <div class="month-selectors">
+                <button type="button" class="btn-icon" id="btnPrevMonth" title="Previous Month" aria-label="Previous month">‹</button>
+                <select id="selectMonth" aria-label="Select month"></select>
+                <select id="selectYear" aria-label="Select year"></select>
+                <button type="button" class="btn-icon" id="btnNextMonth" title="Next Month" aria-label="Next month">›</button>
+                <button type="button" class="btn-today" id="btnCurrentMonth">This Month</button>
+            </div>
+        </section>
+
+        <!-- Summary Statistics Cards -->
+        <section class="stats-grid" aria-label="Summary Statistics">
+            <!-- Monthly Budget Card -->
+            <div class="stat-card budget-card">
+                <div class="stat-header">
+                    <span class="stat-label">Monthly Budget</span>
+                    <span class="stat-icon" aria-hidden="true">🎯</span>
+                </div>
+                <div class="stat-value" id="summaryBudget">₹0.00</div>
+                <div class="stat-subtext">
+                    <span>Target for <strong class="selectedMonthLabel">...</strong></span>
+                    <span class="badge" id="budgetStatusBadge">Not set</span>
+                </div>
+            </div>
+
+            <!-- Total Expenses Card -->
+            <div class="stat-card expense-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Expenses</span>
+                    <span class="stat-icon" aria-hidden="true">💳</span>
+                </div>
+                <div class="stat-value text-expense" id="summaryExpenses">₹0.00</div>
+                <div class="stat-subtext">
+                    <span>Total spent this month</span>
+                    <span class="badge info" id="expenseCountBadge">0 items</span>
+                </div>
+            </div>
+
+            <!-- Remaining Balance Card -->
+            <div class="stat-card balance-card" id="cardBalance">
+                <div class="stat-header">
+                    <span class="stat-label">Remaining Balance</span>
+                    <span class="stat-icon" aria-hidden="true">💵</span>
+                </div>
+                <div class="stat-value" id="summaryRemaining">₹0.00</div>
+                <div class="stat-subtext">
+                    <span id="spentPercentageText">0% of budget spent</span>
+                    <span class="badge" id="balanceStatusBadge">On Track</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Budget Utilization Progress Bar & Alert Banner -->
+        <section class="utilization-section" aria-label="Budget Utilization">
+            <div class="progress-header">
+                <span>Budget Spent Progress</span>
+                <span id="progressPercentage">0%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="alert-box" id="budgetAlert" role="alert"></div>
+        </section>
+
+        <!-- Feature Grid: Set Monthly Budget and Add Expenses -->
+        <section class="features-grid" aria-label="Manage Budget and Expenses">
+            <!-- Feature 1: Set Monthly Budget -->
+            <div class="feature-box">
+                <h2><span>🎯</span> Set Monthly Budget</h2>
+                <p class="feature-subtitle">Configure your monthly budget target for <strong class="selectedMonthLabel">...</strong></p>
+                <form id="budgetForm" novalidate>
+                    <div class="form-group">
+                        <label for="budgetAmount">Monthly Budget Amount (₹)</label>
+                        <div class="input-with-icon">
+                            <span class="input-currency-symbol">₹</span>
+                            <input
+                                type="number"
+                                id="budgetAmount"
+                                name="budgetAmount"
+                                step="0.01"
+                                min="0"
+                                placeholder="e.g. 25000.00"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit btn-budget" id="saveBudgetBtn">
+                        Save Monthly Budget
+                    </button>
+                    <div id="budgetFeedback" class="feedback-alert" role="status"></div>
+                </form>
+            </div>
+
+            <!-- Feature 2: Add Expense -->
+            <div class="feature-box">
+                <h2><span>➕</span> Add Expense</h2>
+                <p class="feature-subtitle">Record a new expense in <strong class="selectedMonthLabel">...</strong></p>
+                <form id="expenseForm" novalidate>
+                    <div class="form-group">
+                        <label for="expenseTitle">Expense Description</label>
+                        <input
+                            type="text"
+                            id="expenseTitle"
+                            name="expenseTitle"
+                            placeholder="e.g. Groceries, Electricity Bill, Dining"
+                            required
+                        />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseAmount">Amount (₹)</label>
+                            <div class="input-with-icon">
+                                <span class="input-currency-symbol">₹</span>
+                                <input
+                                    type="number"
+                                    id="expenseAmount"
+                                    name="expenseAmount"
+                                    step="0.01"
+                                    min="0.01"
+                                    placeholder="0.00"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseCategory">Category</label>
+                            <select id="expenseCategory" name="expenseCategory">
+                                <option value="Food & Dining">Food & Dining</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Utilities & Bills">Utilities & Bills</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseDate">Date</label>
+                            <input type="date" id="expenseDate" name="expenseDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseNotes">Notes / Merchant (Optional)</label>
+                            <input
+                                type="text"
+                                id="expenseNotes"
+                                name="expenseNotes"
+                                placeholder="e.g. Supermarket, Online"
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit btn-expense" id="addExpenseBtn">
+                        ➕ Add Expense
+                    </button>
+                    <div id="expenseFeedback" class="feedback-alert" role="status"></div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Expenses List & History Section -->
+        <section class="expenses-section" aria-label="Monthly Expenses Records">
+            <div class="expenses-header">
+                <h2><span>📋</span> Expenses for <span class="selectedMonthLabel">...</span></h2>
+                <div class="table-filters">
+                    <input
+                        type="text"
+                        id="searchExpense"
+                        placeholder="Search description or notes..."
+                        aria-label="Search expenses"
+                    />
+                    <select id="filterCategory" aria-label="Filter by category">
+                        <option value="All">All Categories</option>
+                        <option value="Food & Dining">Food & Dining</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Utilities & Bills">Utilities & Bills</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Education">Education</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table Feedback Banner -->
+            <div id="tableFeedback" class="feedback-alert" role="status"></div>
+
+            <!-- Table Container -->
+            <div class="table-container" id="tableContainer">
+                <table class="expense-data-table" aria-label="Expense records">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Notes</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTbody"></tbody>
+                    <tfoot>
+                        <tr style="background: #f7fafc; font-weight: 700;">
+                            <td colspan="4" style="text-align: right; padding: 14px;">Total Expenses:</td>
+                            <td id="tableTotalAmount" style="color: #e53e3e; font-size: 16px; padding: 14px;">₹0.00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyExpenseState" style="display: none;">
+                <div class="empty-icon" aria-hidden="true">🧾</div>
+                <p>No expenses recorded for <strong class="selectedMonthLabel">...</strong> yet.</p>
+                <p style="margin-top: 6px; font-size: 13px; color: #a0aec0;">Use the "Add Expense" form above to start tracking your spending!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Edit Expense Modal -->
+    <div class="modal-backdrop" id="editExpenseModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 id="editModalTitle"><span>✏️</span> Edit Expense</h3>
+                <button type="button" class="modal-close-btn" id="closeEditModalBtn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="editExpenseForm" novalidate>
+                <input type="hidden" id="editExpenseId" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editExpenseTitle">Expense Description</label>
+                        <input
+                            type="text"
+                            id="editExpenseTitle"
+                            name="editExpenseTitle"
+                            placeholder="e.g. Groceries, Electricity Bill, Dining"
+                            required
+                        />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editExpenseAmount">Amount (₹)</label>
+                            <div class="input-with-icon">
+                                <span class="input-currency-symbol">₹</span>
+                                <input
+                                    type="number"
+                                    id="editExpenseAmount"
+                                    name="editExpenseAmount"
+                                    step="0.01"
+                                    min="0.01"
+                                    placeholder="0.00"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseCategory">Category</label>
+                            <select id="editExpenseCategory" name="editExpenseCategory">
+                                <option value="Food & Dining">Food & Dining</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Utilities & Bills">Utilities & Bills</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editExpenseDate">Date</label>
+                            <input type="date" id="editExpenseDate" name="editExpenseDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="editExpenseNotes">Notes / Merchant (Optional)</label>
+                            <input
+                                type="text"
+                                id="editExpenseNotes"
+                                name="editExpenseNotes"
+                                placeholder="e.g. Supermarket, Online"
+                            />
+                        </div>
+                    </div>
+                    <div id="editExpenseFeedback" class="feedback-alert" role="status"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelEditModalBtn">Cancel</button>
+                    <button type="submit" class="btn-submit btn-save-edit" id="saveEditExpenseBtn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/login-page/dashboard.js"></script>
+</body>
+</html>
