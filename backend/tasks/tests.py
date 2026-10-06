@@ -671,6 +671,31 @@ class ExpenseApiTests(TestCase):
 		self.assertEqual(response.status_code, 400)
 		self.assertEqual(Expense.objects.count(), 0)
 
+	def test_add_expense_with_dashboard_fields(self):
+		response = self.post_expense({
+			'title': 'Dinner at Restaurant',
+			'amount': 850.50,
+			'category': 'Food & Dining',
+			'date': '2026-10-06',
+			'notes': 'Family dinner',
+		})
+		self.assertEqual(response.status_code, 201)
+		data = response.json()
+		self.assertEqual(data['expense']['title'], 'Dinner at Restaurant')
+		self.assertEqual(data['expense']['amount'], '850.50')
+		self.assertEqual(data['expense']['category'], 'Food & Dining')
+		self.assertEqual(data['expense']['notes'], 'Family dinner')
+
+	def test_add_expense_with_iso_datetime_and_whitespace(self):
+		response = self.post_expense({
+			'title': 'Coffee',
+			'amount': '150.00',
+			'category': 'Food & Dining',
+			'date': ' 2026-10-06T14:30:00 ',
+		})
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(response.json()['expense']['date'], '2026-10-06')
+
 
 class IncomeApiTests(TestCase):
 	def setUp(self):

@@ -355,12 +355,18 @@ def expenses_api(request):
 	date_val = payload.get('date')
 	if not date_val:
 		expense_date = today
+	elif isinstance(date_val, datetime):
+		expense_date = date_val.date()
 	elif isinstance(date_val, date):
 		expense_date = date_val
 	else:
+		date_str = str(date_val).strip()
 		try:
-			expense_date = datetime.strptime(str(date_val), '%Y-%m-%d').date()
-		except ValueError:
+			if 'T' in date_str:
+				expense_date = datetime.fromisoformat(date_str.replace('Z', '+00:00')).date()
+			else:
+				expense_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+		except (ValueError, TypeError):
 			errors['date'] = 'Enter a valid date.'
 			expense_date = None
 
@@ -374,15 +380,18 @@ def expenses_api(request):
 
 	user = request.user if request.user.is_authenticated else None
 
-	expense = Expense.objects.create(
-		user=user,
-		title=title,
-		amount=amount,
-		category=category,
-		date=expense_date,
-		description=description,
-		notes=notes
-	)
+	try:
+		expense = Expense.objects.create(
+			user=user,
+			title=title,
+			amount=amount,
+			category=category,
+			date=expense_date,
+			description=description,
+			notes=notes
+		)
+	except Exception as exc:
+		return JsonResponse({'error': f'Failed to add expense: {str(exc)}'}, status=500)
 
 	return JsonResponse({
 		'message': 'Expense added successfully.',
@@ -463,13 +472,19 @@ def expense_detail_api(request, expense_id):
 			errors['amount'] = 'Enter an amount greater than zero with at most two decimal places.'
 
 	if 'date' in payload:
-		date_str = payload['date']
-		if isinstance(date_str, date):
-			expense.date = date_str
+		date_val = payload['date']
+		if isinstance(date_val, datetime):
+			expense.date = date_val.date()
+		elif isinstance(date_val, date):
+			expense.date = date_val
 		else:
+			d_str = str(date_val).strip()
 			try:
-				expense.date = datetime.strptime(str(date_str), '%Y-%m-%d').date()
-			except ValueError:
+				if 'T' in d_str:
+					expense.date = datetime.fromisoformat(d_str.replace('Z', '+00:00')).date()
+				else:
+					expense.date = datetime.strptime(d_str, '%Y-%m-%d').date()
+			except (ValueError, TypeError):
 				errors['date'] = 'Enter a valid date.'
 
 	if errors:
