@@ -473,7 +473,8 @@ function setupForms() {
 
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                showFeedback("expenseFeedback", data.error || "Failed to add expense.", false);
+                const errorMsg = (data.errors ? Object.values(data.errors).join(" ") : "") || data.error || "Failed to add expense.";
+                showFeedback("expenseFeedback", errorMsg, false);
                 return;
             }
 
@@ -482,14 +483,18 @@ function setupForms() {
             document.getElementById("expenseAmount").value = "";
             document.getElementById("expenseNotes").value = "";
 
-            // If the added expense's date belongs to the currently viewed month, refresh immediately
-            const expenseDateObj = new Date(dateVal);
-            if (expenseDateObj.getFullYear() === state.year && (expenseDateObj.getMonth() + 1) === state.month) {
-                await refreshDashboard();
-            } else {
-                // Also update current view if year and month match
-                await refreshDashboard();
+            // If the expense was added for a different month/year, switch state so it appears in the table
+            const parts = dateVal.split("-");
+            if (parts.length >= 2) {
+                const expYear = parseInt(parts[0], 10);
+                const expMonth = parseInt(parts[1], 10);
+                if (expYear !== state.year || expMonth !== state.month) {
+                    state.year = expYear;
+                    state.month = expMonth;
+                    syncDateControls();
+                }
             }
+            await refreshDashboard();
         } catch {
             showFeedback("expenseFeedback", "Unable to add expense. Check connection.", false);
         } finally {
@@ -627,7 +632,8 @@ function setupEditModal() {
 
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    showFeedback("editExpenseFeedback", data.error || "Failed to update expense.", false);
+                    const errorMsg = (data.errors ? Object.values(data.errors).join(" ") : "") || data.error || "Failed to update expense.";
+                    showFeedback("editExpenseFeedback", errorMsg, false);
                     return;
                 }
 
