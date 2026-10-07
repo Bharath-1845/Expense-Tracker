@@ -79,32 +79,95 @@ def login_api(request):
 	if not isinstance(payload, dict):
 		return JsonResponse({'error': 'Invalid request data.'}, status=400)
 
-	email = payload.get('email', '')
-	password = payload.get('password', '')
-	if not isinstance(email, str) or not isinstance(password, str):
-		return JsonResponse({'error': 'Email and password are required.'}, status=400)
+    asset_root = (settings.BASE_DIR / 'login-page').resolve()
+    asset_path = (asset_root / filename).resolve()
 
-	email = email.strip()
-	if not email or not password:
-		return JsonResponse({'error': 'Email and password are required.'}, status=400)
+    if asset_root not in asset_path.parents or not asset_path.is_file():
+        return JsonResponse(
+            {'error': 'Not found.'},
+            status=404
+        )
 
-	user_model = get_user_model()
-	matching_user = user_model.objects.filter(email__iexact=email).first()
-	username = matching_user.get_username() if matching_user else email
-	user = authenticate(request, username=username, password=password)
+    return FileResponse(asset_path.open('rb'))
 
-	if user is None:
-		return JsonResponse({'error': 'Invalid email or password.'}, status=401)
 
-	login(request, user)
-	request.session.set_expiry(1209600 if payload.get('remember') is True else 0)
-	return JsonResponse({'message': 'Login successful.', 'redirect': '/dashboard/'})
+@require_POST
+def login_api(request):
+    try:
+        payload = json.loads(request.body)
+
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {'error': 'Invalid request data.'},
+            status=400
+        )
+
+    if not isinstance(payload, dict):
+        return JsonResponse(
+            {'error': 'Invalid request data.'},
+            status=400
+        )
+
+    email = payload.get('email', '')
+    password = payload.get('password', '')
+
+    if not isinstance(email, str) or not isinstance(password, str):
+        return JsonResponse(
+            {'error': 'Email and password are required.'},
+            status=400
+        )
+
+    email = email.strip()
+
+    if not email or not password:
+        return JsonResponse(
+            {'error': 'Email and password are required.'},
+            status=400
+        )
+
+    user_model = get_user_model()
+
+    matching_user = user_model.objects.filter(
+        email__iexact=email
+    ).first()
+
+    username = (
+        matching_user.get_username()
+        if matching_user
+        else email
+    )
+
+    user = authenticate(
+        request,
+        username=username,
+        password=password
+    )
+
+    if user is None:
+        return JsonResponse(
+            {'error': 'Invalid email or password.'},
+            status=401
+        )
+
+    login(request, user)
+
+    request.session.set_expiry(
+        1209600 if payload.get('remember') is True else 0
+    )
+
+    return JsonResponse({
+        'message': 'Login successful.',
+        'redirect': '/dashboard/'
+    })
 
 
 @require_POST
 def logout_api(request):
-	logout(request)
-	return JsonResponse({'message': 'You have been logged out.'})
+    logout(request)
+
+    return JsonResponse({
+        'message': 'You have been logged out.'
+    })
 
 
 @require_GET

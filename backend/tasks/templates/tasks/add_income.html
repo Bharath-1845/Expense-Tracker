@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Income</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .container {
+            width: 500px;
+            max-width: 90%;
+
+            background: white;
+            padding: 35px;
+
+            border-radius: 20px;
+
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 13px;
+
+            border: 1px solid #ccc;
+            border-radius: 8px;
+
+            font-size: 15px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        .error {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+
+            border: none;
+            border-radius: 8px;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .cancel {
+            background: #eee;
+            color: #333;
+        }
+
+        .submit {
+            background: #667eea;
+            color: white;
+        }
+
+        .submit:hover {
+            background: #5568d9;
+        }
+
+
+        /* SUCCESS POPUP */
+
+        .popup {
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.5);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+
+            width: 350px;
+
+            padding: 30px;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+
+            margin: 0 auto 15px;
+
+            border-radius: 50%;
+
+            background: #28a745;
+            color: white;
+
+            font-size: 40px;
+            line-height: 60px;
+        }
+
+        .popup-content h2 {
+            margin: 10px 0;
+        }
+
+        .popup-content p {
+            color: #666;
+        }
+
+        .popup-content button {
+            width: 100%;
+
+            background: #667eea;
+            color: white;
+
+            margin-top: 15px;
+        }
+
+        .popup-content button:hover {
+            background: #5568d9;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- SUCCESS POPUP -->
+
+    {% if success %}
+
+    <div class="popup" id="successPopup">
+
+        <div class="popup-content">
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <h2>
+                Success!
+            </h2>
+
+            <p>
+                {{ success }}
+            </p>
+
+            <button
+                type="button"
+                onclick="closePopup()">
+                OK
+            </button>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- ADD INCOME FORM -->
+
+    <div class="container">
+
+        <h1>
+            💰 Add Income
+        </h1>
+
+        <p class="subtitle">
+            Record your income
+        </p>
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
+            <!-- INCOME SOURCE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.source.id_for_label }}">
+                    Income Source
+                </label>
+
+                {{ form.source }}
+
+                {% for error in form.source.errors %}
+
+                    <div class="error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- AMOUNT -->
+
+            <div class="form-group">
+
+                <label for="{{ form.amount.id_for_label }}">
+                    Amount
+                </label>
+
+                {{ form.amount }}
+
+                {% for error in form.amount.errors %}
+
+                    <div class="error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- DATE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.date.id_for_label }}">
+                    Date
+                </label>
+
+                {{ form.date }}
+
+                {% for error in form.date.errors %}
+
+                    <div class="error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group">
+
+                <label for="{{ form.description.id_for_label }}">
+                    Description
+                </label>
+
+                {{ form.description }}
+
+                {% for error in form.description.errors %}
+
+                    <div class="error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="buttons">
+
+                <button
+                    type="button"
+                    class="cancel"
+                    onclick="history.back()">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="submit">
+
+                    Add Income
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- POPUP JAVASCRIPT -->
+
+    <script>
+
+        function closePopup() {
+
+            const popup =
+                document.getElementById("successPopup");
+
+            if (popup) {
+
+                popup.style.display = "none";
+
+            }
+        }
+
+
+        // Automatically close popup after 3 seconds
+
+        setTimeout(function() {
+
+            const popup =
+                document.getElementById("successPopup");
+
+            if (popup) {
+
+                popup.style.display = "none";
+
+            }
+
+        }, 3000);
+
+    </script>
+
+
+</body>
+</html>
