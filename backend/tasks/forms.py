@@ -1,23 +1,11 @@
 from django import forms
-from django.contrib.auth.models import User
-from .models import MemberProfile
+from .models import Income, MemberProfile
 
 
 class MemberProfileForm(forms.ModelForm):
-
-    first_name = forms.CharField(
-        max_length=100,
-        required=True
-    )
-
-    last_name = forms.CharField(
-        max_length=100,
-        required=False
-    )
-
-    email = forms.EmailField(
-        required=True
-    )
+    first_name = forms.CharField(max_length=100, required=True)
+    last_name = forms.CharField(max_length=100, required=False)
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = MemberProfile
@@ -26,7 +14,7 @@ class MemberProfileForm(forms.ModelForm):
             'last_name',
             'email',
             'phone',
-            'address'
+            'address',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -51,3 +39,40 @@ class MemberProfileForm(forms.ModelForm):
                 profile.save()
 
         return profile
+
+
+class IncomeForm(forms.ModelForm):
+    class Meta:
+        model = Income
+        fields = ['source', 'amount', 'date', 'description']
+        widgets = {
+            'source': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter income source',
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter amount',
+                'step': '0.01',
+                'min': '0',
+            }),
+            'date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter description (optional)',
+                'rows': 4,
+            }),
+        }
+
+    def clean_amount(self):
+        amount = self.cleaned_data['amount']
+
+        if amount <= 0:
+            raise forms.ValidationError(
+                'Income amount must be greater than zero.'
+            )
+
+        return amount

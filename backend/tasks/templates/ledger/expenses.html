@@ -1,0 +1,282 @@
+{% extends 'ledger/base.html' %}
+{% block title %}Manage Expenses | Expense Manager{% endblock %}
+{% block content %}
+
+<section class="welcome-row">
+    <div>
+        <p class="eyebrow">EXPENSE MANAGEMENT</p>
+        <h1>View expenses</h1>
+        <p class="welcome-copy">Search, edit, and remove individual expense records.</p>
+    </div>
+    <a class="button-primary" href="{% url 'expense-add' %}">＋ Add expense</a>
+</section>
+
+<section class="panel editor-panel page-editor" id="expenseEditor" hidden aria-labelledby="expenseEditTitle">
+    <div class="panel-heading">
+        <span class="panel-icon edit-icon" aria-hidden="true">✎</span>
+        <div>
+            <h2 id="expenseEditTitle">Edit expense</h2>
+            <p>Changes apply only to the selected record.</p>
+        </div>
+    </div>
+
+```
+<form id="expenseEditForm" data-kind="expense" data-mode="edit" novalidate>
+    <input id="expenseEditId" type="hidden">
+
+    <div class="form-grid">
+
+        <div class="field-group">
+            <label for="expenseEditAmount">Amount (₹)</label>
+            <div class="input-with-icon">
+                <span aria-hidden="true">₹</span>
+                <input
+                    id="expenseEditAmount"
+                    name="amount"
+                    type="number"
+                    min="0.01"
+                    max="99999999.99"
+                    step="0.01"
+                    required
+                >
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label for="expenseEditCategory">Category</label>
+
+            <div class="category-picker">
+
+                <input
+                    id="expenseEditCategorySearch"
+                    class="category-search"
+                    type="search"
+                    placeholder="Find a category..."
+                    autocomplete="off"
+                    aria-label="Search expense categories"
+                >
+
+                <div class="input-with-icon">
+                    <span aria-hidden="true">▦</span>
+
+                    <select
+                        id="expenseEditCategory"
+                        name="category"
+                        required
+                    >
+                        <option value="">Choose a category</option>
+                    </select>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label for="expenseEditDate">Date</label>
+
+            <div class="input-with-icon">
+                <span aria-hidden="true">▦</span>
+
+                <input
+                    id="expenseEditDate"
+                    name="date"
+                    type="date"
+                    required
+                >
+            </div>
+        </div>
+
+        <div class="field-group description-field">
+            <label for="expenseEditDescription">
+                Description <span>OPTIONAL</span>
+            </label>
+
+            <textarea
+                id="expenseEditDescription"
+                name="description"
+                rows="2"
+                maxlength="1000"
+            ></textarea>
+        </div>
+
+    </div>
+
+    <p
+        id="expenseEditMessage"
+        class="form-message"
+        role="status"
+        aria-live="polite"
+    ></p>
+
+    <div class="form-actions">
+        <button class="button-primary" type="submit">
+            Save changes
+        </button>
+
+        <button
+            class="button-quiet"
+            id="cancelExpenseEdit"
+            type="button"
+        >
+            Cancel
+        </button>
+    </div>
+
+</form>
+```
+
+</section>
+
+<section class="panel expenses-panel management-panel">
+
+```
+<div class="list-heading">
+
+    <div class="panel-heading compact-heading">
+
+        <span
+            class="panel-icon list-icon"
+            aria-hidden="true"
+        >☷</span>
+
+        <div>
+            <h2>Your expenses</h2>
+            <p id="expenseSummaryLine">
+                Search all expense records.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Search and Category Filter -->
+    <div class="expense-filters">
+
+        <!-- Search Box -->
+        <label
+            class="search-box"
+            for="expenseListSearch"
+        >
+
+            <span aria-hidden="true">⌕</span>
+
+            <input
+                id="expenseListSearch"
+                type="search"
+                placeholder="Search amount, category, date..."
+                autocomplete="off"
+            >
+
+        </label>
+
+        <!-- Category Filter -->
+        <label
+            class="filter-box"
+            for="expenseCategoryFilter"
+        >
+
+            <select id="expenseCategoryFilter">
+
+                <option value="">
+                    All Categories
+                </option>
+
+            </select>
+
+        </label>
+
+    </div>
+
+</div>
+
+<p
+    id="expenseListMessage"
+    class="list-message"
+    role="status"
+    aria-live="polite"
+></p>
+
+<div class="table-wrap">
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>#</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th class="actions-heading">Actions</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="expenseListRows"></tbody>
+
+    </table>
+
+    <div
+        class="empty-state"
+        id="expenseListEmpty"
+        hidden
+    >
+
+        <strong>No expenses recorded</strong>
+
+        <p>
+            Add an expense to start your list.
+        </p>
+
+    </div>
+
+    <div
+        class="empty-state"
+        id="expenseSearchEmpty"
+        hidden
+    >
+
+        <strong>No matching expenses</strong>
+
+        <p>
+            Try another search.
+        </p>
+
+    </div>
+
+</div>
+
+<footer class="table-footer">
+
+    <span id="expenseListCount"></span>
+
+    <div class="pagination">
+
+        <button
+            id="expensePrevious"
+            type="button"
+            aria-label="Previous page"
+        >
+            ‹
+        </button>
+
+        <span id="expensePage">
+            1
+        </span>
+
+        <button
+            id="expenseNext"
+            type="button"
+            aria-label="Next page"
+        >
+            ›
+        </button>
+
+    </div>
+
+</footer>
+```
+
+</section>
+
+{% endblock %}
