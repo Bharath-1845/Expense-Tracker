@@ -71,28 +71,6 @@ def login_asset(request, filename):
 
 @require_POST
 def login_api(request):
-	try:
-		payload = json.loads(request.body)
-	except (json.JSONDecodeError, UnicodeDecodeError):
-		return JsonResponse({'error': 'Invalid request data.'}, status=400)
-
-	if not isinstance(payload, dict):
-		return JsonResponse({'error': 'Invalid request data.'}, status=400)
-
-    asset_root = (settings.BASE_DIR / 'login-page').resolve()
-    asset_path = (asset_root / filename).resolve()
-
-    if asset_root not in asset_path.parents or not asset_path.is_file():
-        return JsonResponse(
-            {'error': 'Not found.'},
-            status=404
-        )
-
-    return FileResponse(asset_path.open('rb'))
-
-
-@require_POST
-def login_api(request):
     try:
         payload = json.loads(request.body)
 

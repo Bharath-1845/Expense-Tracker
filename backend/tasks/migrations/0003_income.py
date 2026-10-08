@@ -7,21 +7,22 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('tasks', '0002_expense'),
+        ('tasks', '0002_income'),
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Income',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('source', models.CharField(max_length=50)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('date', models.DateField()),
-                ('description', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-            ],
-            options={
-                'ordering': ['-date', '-created_at'],
-            },
+        migrations.AlterField(
+            model_name='income',
+            name='source',
+            field=models.CharField(max_length=50),
+        ),
+        migrations.AddField(
+            model_name='income',
+            name='created_at',
+            field=models.DateTimeField(auto_now_add=True),
+        ),
+        migrations.AlterModelOptions(
+            name='income',
+            options={'ordering': ['-date', '-created_at']},
         ),
     ]

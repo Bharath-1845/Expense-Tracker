@@ -237,8 +237,6 @@ small {
         gap: 12px;
     }
 }
-<<<<<<< HEAD:backend/login-page/style.css
-
 :root {
     --ledger-ink: #162b4a;
     --ledger-muted: #6d7e96;
@@ -1483,5 +1481,3 @@ body.ledger-app {
         padding: 14px 12px;
     }
 }
-=======
->>>>>>> origin/main:backend/tasks/static/tasks/app.css

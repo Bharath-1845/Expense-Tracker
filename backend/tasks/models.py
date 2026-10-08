@@ -52,6 +52,12 @@ class Task(models.Model):
         return self.title
 
 
+class MemberProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=15, blank=True)
+    address = models.TextField(blank=True)
+
+
 class MonthlyBudget(models.Model):
     user = models.ForeignKey(
         User,
