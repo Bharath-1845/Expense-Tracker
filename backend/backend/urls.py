@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path, reverse_lazy
+from django.urls import path, reverse_lazy , include
 from django.views.generic.base import RedirectView
 from tasks import views
 
@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/logout/', views.logout_api, name='logout-api'),
     path('api/session/', views.session_api, name='session-api'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('profile/', views.member_profile, name='member_profile'),
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(
@@ -66,4 +67,5 @@ urlpatterns = [
         ),
         name='password-reset-complete',
     ),
+    path('', include('tasks.urls')),
 ]

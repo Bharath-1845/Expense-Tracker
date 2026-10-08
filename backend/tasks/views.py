@@ -7,6 +7,12 @@ from django.http import FileResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .models import MemberProfile, MonthlyExpense
+from .forms import MemberProfileForm
 
 
 DASHBOARD_PAGE = settings.BASE_DIR / 'login-page' / 'dashboard.html'
@@ -79,3 +85,100 @@ def dashboard(request):
 @login_required(login_url='/')
 def session_api(request):
 	return JsonResponse({'username': request.user.get_username(), 'email': request.user.email})
+
+@login_required(login_url='/')
+def member_profile(request):
+    profile, created = MemberProfile.objects.get_or_create(
+        user=request.user
+    )
+
+    if request.method == 'POST':
+        form = MemberProfileForm(
+            request.POST,
+            instance=profile,
+            user=request.user
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect('member_profile')
+
+    else:
+        form = MemberProfileForm(
+            instance=profile,
+            user=request.user
+        )
+
+    return render(
+        request,
+        'tasks/member_profile.html',
+        {
+            'form': form,
+            'profile': profile
+        }
+    )
+
+@login_required(login_url='/')
+def monthly_spending_analysis(request):
+
+    monthly_expenses = (
+        MonthlyExpense.objects
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    monthly_data = []
+
+    for expense in monthly_expenses:
+        monthly_data.append({
+            'month': expense['month'].strftime('%Y-%m'),
+            'amount': float(expense['total'])
+        })
+
+    months = [item['month'] for item in monthly_data]
+    amounts = [item['amount'] for item in monthly_data]
+
+    comparison = None
+
+    if len(monthly_data) >= 2:
+
+        current = monthly_data[-1]['amount']
+        previous = monthly_data[-2]['amount']
+
+        if previous > 0:
+            percentage = ((current - previous) / previous) * 100
+        else:
+            percentage = 0
+
+        if current > previous:
+            message = 'Spending increased'
+            difference = current - previous
+
+        elif current < previous:
+            message = 'Spending decreased'
+            difference = previous - current
+
+        else:
+            message = 'Spending remained the same'
+            difference = 0
+
+        comparison = {
+            'message': message,
+            'difference': round(difference, 2),
+            'percentage': round(abs(percentage), 2)
+        }
+
+    context = {
+        'monthly_data': monthly_data,
+        'months': months,
+        'amounts': amounts,
+        'comparison': comparison,
+    }
+
+    return render(
+        request,
+        'tasks/monthly_spending_analysis.html',
+        context
+    )
