@@ -1,3 +1,4 @@
+﻿
 // Dashboard JavaScript for Expense Manager
 
 const state = {
@@ -14,82 +15,131 @@ const MONTH_NAMES = [
     "July", "August", "September", "October", "November", "December"
 ];
 
+// Read a cookie by name
 function readCookie(name) {
     const cookie = document.cookie
         .split(";")
         .map((part) => part.trim())
         .find((part) => part.startsWith(`${name}=`));
-    return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : "";
+
+    return cookie
+        ? decodeURIComponent(cookie.slice(name.length + 1))
+        : "";
 }
 
+// Format amounts as Indian Rupees
 function formatCurrency(val) {
     const num = Number(val) || 0;
-    return `₹${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    return `₹${num.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })}`;
 }
 
+// Get CSS class for expense categories
 function getCategoryClass(category) {
-    switch ((category || '').toLowerCase()) {
-        case 'food & dining': return 'cat-food';
-        case 'transportation': return 'cat-transport';
-        case 'utilities & bills': return 'cat-utilities';
-        case 'shopping': return 'cat-shopping';
-        case 'entertainment': return 'cat-entertainment';
-        case 'healthcare': return 'cat-healthcare';
-        case 'education': return 'cat-education';
-        default: return 'cat-other';
+    switch ((category || "").toLowerCase()) {
+        case "food & dining":
+            return "cat-food";
+        case "transportation":
+            return "cat-transport";
+        case "utilities & bills":
+            return "cat-utilities";
+        case "shopping":
+            return "cat-shopping";
+        case "entertainment":
+            return "cat-entertainment";
+        case "healthcare":
+            return "cat-healthcare";
+        case "education":
+            return "cat-education";
+        default:
+            return "cat-other";
     }
 }
 
+// Display feedback messages
 function showFeedback(elementId, message, isSuccess = true) {
     const el = document.getElementById(elementId);
+
     if (!el) return;
+
     el.textContent = message;
-    el.className = `feedback-alert ${isSuccess ? 'show-success' : 'show-error'}`;
+    el.className = `feedback-alert ${
+        isSuccess ? "show-success" : "show-error"
+    }`;
+
     setTimeout(() => {
-        el.className = 'feedback-alert';
-        el.textContent = '';
+        el.className = "feedback-alert";
+        el.textContent = "";
     }, 4000);
 }
 
 // Check session
 async function initSession() {
     try {
-        const response = await fetch("/api/session/", { credentials: "same-origin" });
+        const response = await fetch("/api/session/", {
+            credentials: "same-origin"
+        });
+
         if (!response.ok) {
             window.location.replace("/");
             return;
         }
+
         const user = await response.json();
         const signedInUserEl = document.getElementById("signedInUser");
+
         if (signedInUserEl) {
-            signedInUserEl.textContent = user.email || user.username || "User";
+            signedInUserEl.textContent =
+                user.email || user.username || "User";
         }
-    } catch {
+    } catch (err) {
+        console.error("Failed to check session:", err);
         window.location.replace("/");
     }
 }
 
-// Initialize Year and Month dropdowns
+// Initialize month and year dropdowns
 function setupDateSelectors() {
     const monthSelect = document.getElementById("selectMonth");
     const yearSelect = document.getElementById("selectYear");
 
+    if (!monthSelect || !yearSelect) {
+        console.error("Month or year selector is missing.");
+        return;
+    }
+
     monthSelect.innerHTML = "";
+
     MONTH_NAMES.forEach((name, index) => {
         const opt = document.createElement("option");
+
         opt.value = index + 1;
         opt.textContent = name;
-        if (index + 1 === state.month) opt.selected = true;
+
+        if (index + 1 === state.month) {
+            opt.selected = true;
+        }
+
         monthSelect.appendChild(opt);
     });
 
     yearSelect.innerHTML = "";
+
     const currentYear = new Date().getFullYear();
+
     for (let y = currentYear - 3; y <= currentYear + 3; y++) {
         const opt = document.createElement("option");
+
         opt.value = y;
         opt.textContent = y;
-        if (y === state.year) opt.selected = true;
+
+        if (y === state.year) {
+            opt.selected = true;
+        }
+
         yearSelect.appendChild(opt);
     }
 
@@ -110,6 +160,7 @@ function setupDateSelectors() {
         } else {
             state.month -= 1;
         }
+
         syncDateControls();
         refreshDashboard();
     });
@@ -121,49 +172,67 @@ function setupDateSelectors() {
         } else {
             state.month += 1;
         }
+
         syncDateControls();
         refreshDashboard();
     });
 
     document.getElementById("btnCurrentMonth").addEventListener("click", () => {
         const now = new Date();
+
         state.year = now.getFullYear();
         state.month = now.getMonth() + 1;
+
         syncDateControls();
         refreshDashboard();
     });
 }
 
+// Synchronize dropdown values
 function syncDateControls() {
     document.getElementById("selectMonth").value = state.month;
     document.getElementById("selectYear").value = state.year;
 }
 
+// Update selected month labels
 function updateMonthLabels() {
     const monthStr = `${MONTH_NAMES[state.month - 1]} ${state.year}`;
+
     document.querySelectorAll(".selectedMonthLabel").forEach((el) => {
         el.textContent = monthStr;
     });
 }
 
-// Fetch Budget and Summary
+// Fetch budget and summary data
 async function loadBudgetData() {
     try {
-        const res = await fetch(`/api/budget/?year=${state.year}&month=${state.month}`, {
-            credentials: "same-origin"
-        });
-        if (!res.ok) return;
+        const res = await fetch(
+            `/api/budget/?year=${state.year}&month=${state.month}`,
+            {
+                credentials: "same-origin"
+            }
+        );
+
+        if (!res.ok) {
+            console.error("Failed to fetch budget data:", res.status);
+            return;
+        }
+
         const data = await res.json();
 
-        state.budget = data.budget || 0;
-        state.totalExpenses = data.total_expenses || 0;
-        state.remainingBalance = data.remaining_balance || 0;
+        state.budget = Number(data.budget) || 0;
+        state.totalExpenses = Number(data.total_expenses) || 0;
+        state.remainingBalance = Number(data.remaining_balance) || 0;
 
-        // Update Stat Cards
-        document.getElementById("summaryBudget").textContent = formatCurrency(state.budget);
-        document.getElementById("budgetAmount").value = state.budget > 0 ? state.budget : "";
+        // Update budget summary
+        document.getElementById("summaryBudget").textContent =
+            formatCurrency(state.budget);
+
+        document.getElementById("budgetAmount").value =
+            state.budget > 0 ? state.budget : "";
 
         const budgetBadge = document.getElementById("budgetStatusBadge");
+
         if (state.budget > 0) {
             budgetBadge.textContent = "Active";
             budgetBadge.className = "badge success";
@@ -172,84 +241,140 @@ async function loadBudgetData() {
             budgetBadge.className = "badge warning";
         }
 
-        document.getElementById("summaryExpenses").textContent = formatCurrency(state.totalExpenses);
-        document.getElementById("expenseCountBadge").textContent = `${data.expenses_count || 0} item${data.expenses_count === 1 ? '' : 's'}`;
+        // Update expense summary
+        document.getElementById("summaryExpenses").textContent =
+            formatCurrency(state.totalExpenses);
+
+        document.getElementById("expenseCountBadge").textContent =
+            `${data.expenses_count || 0} item${
+                data.expenses_count === 1 ? "" : "s"
+            }`;
 
         const remainingEl = document.getElementById("summaryRemaining");
-        remainingEl.textContent = formatCurrency(state.remainingBalance);
-
         const balanceCard = document.getElementById("cardBalance");
         const balanceBadge = document.getElementById("balanceStatusBadge");
+        const progressBar = document.getElementById("progressBarFill");
+        const alertBox = document.getElementById("budgetAlert");
+
+        remainingEl.textContent = formatCurrency(state.remainingBalance);
 
         if (state.budget > 0) {
-            const pct = data.percentage_used || 0;
-            document.getElementById("spentPercentageText").textContent = `${pct}% of budget spent`;
-            document.getElementById("progressPercentage").textContent = `${pct}%`;
+            const pct = Number(data.percentage_used) || 0;
 
-            const progressBar = document.getElementById("progressBarFill");
-            const clampedWidth = Math.min(100, Math.max(0, pct));
-            progressBar.style.width = `${clampedWidth}%`;
+            // Determine the budget status from the actual amounts
+            const isOverBudget = state.totalExpenses > state.budget;
+            const isExactlyAtLimit = state.totalExpenses === state.budget;
+            const isWarning = pct >= 80 && pct < 100;
 
-            if (data.is_over_budget) {
+            document.getElementById("spentPercentageText").textContent =
+                `${pct}% of budget spent`;
+
+            document.getElementById("progressPercentage").textContent =
+                `${pct}%`;
+
+            // Keep progress bar within 0-100%
+            progressBar.style.width =
+                `${Math.min(100, Math.max(0, pct))}%`;
+
+            // STATUS 1: Expenses exceed the budget
+            if (isOverBudget) {
                 balanceBadge.textContent = "Over Budget";
                 balanceBadge.className = "badge danger";
+
                 remainingEl.className = "stat-value text-balance-danger";
                 balanceCard.className = "stat-card balance-card danger";
                 progressBar.className = "progress-bar-fill danger";
 
-                const alertBox = document.getElementById("budgetAlert");
-                alertBox.className = "alert-box danger";
                 const overAmount = state.totalExpenses - state.budget;
-                alertBox.innerHTML = `⚠️ <strong>Over Budget:</strong> You have exceeded your monthly budget by ${formatCurrency(overAmount)}!`;
+
+                alertBox.className = "alert-box danger";
+                alertBox.textContent =
+                    ` Over Budget: You exceeded your monthly budget by ${formatCurrency(overAmount)}.`;
+
                 alertBox.style.display = "flex";
-            } else if (pct >= 80) {
-                balanceBadge.textContent = "Caution";
+            }
+
+            // STATUS 2: Expenses equal exactly 100% of the budget
+            else if (isExactlyAtLimit) {
+                balanceBadge.textContent = "Limit Reached";
                 balanceBadge.className = "badge warning";
+
                 remainingEl.className = "stat-value text-balance-warn";
                 balanceCard.className = "stat-card balance-card warning";
                 progressBar.className = "progress-bar-fill warning";
 
-                const alertBox = document.getElementById("budgetAlert");
                 alertBox.className = "alert-box warning";
-                alertBox.innerHTML = `⚠️ <strong>High Spending:</strong> You have used ${pct}% of your monthly budget.`;
+                alertBox.textContent =
+                    " Budget Limit Reached: You have used 100% of your monthly budget.";
+
                 alertBox.style.display = "flex";
-            } else {
+            }
+
+            // STATUS 3: Spending is 80% or more but below 100%
+            else if (isWarning) {
+                balanceBadge.textContent = "Caution";
+                balanceBadge.className = "badge warning";
+
+                remainingEl.className = "stat-value text-balance-warn";
+                balanceCard.className = "stat-card balance-card warning";
+                progressBar.className = "progress-bar-fill warning";
+
+                alertBox.className = "alert-box warning";
+                alertBox.textContent =
+                    `High Spending: You have used ${pct}% of your monthly budget.`;
+
+                alertBox.style.display = "flex";
+            }
+
+            // STATUS 4: Spending is below 80%
+            else {
                 balanceBadge.textContent = "On Track";
                 balanceBadge.className = "badge success";
+
                 remainingEl.className = "stat-value text-balance-ok";
                 balanceCard.className = "stat-card balance-card";
                 progressBar.className = "progress-bar-fill";
 
-                const alertBox = document.getElementById("budgetAlert");
                 alertBox.style.display = "none";
+                alertBox.textContent = "";
             }
         } else {
-            document.getElementById("spentPercentageText").textContent = "Set budget to track %";
+            // STATUS 5: No budget has been configured
+            document.getElementById("spentPercentageText").textContent =
+                "Set budget to track %";
+
             document.getElementById("progressPercentage").textContent = "0%";
-            document.getElementById("progressBarFill").style.width = "0%";
-            document.getElementById("progressBarFill").className = "progress-bar-fill";
+
+            progressBar.style.width = "0%";
+            progressBar.className = "progress-bar-fill";
 
             balanceBadge.textContent = "No Budget";
             balanceBadge.className = "badge info";
+
             remainingEl.className = "stat-value";
             balanceCard.className = "stat-card balance-card";
 
-            const alertBox = document.getElementById("budgetAlert");
             alertBox.style.display = "none";
+            alertBox.textContent = "";
         }
     } catch (err) {
         console.error("Failed to load budget data:", err);
     }
 }
 
-// Fetch Expenses
 async function loadExpensesData() {
     try {
-        const res = await fetch(`/api/expenses/?year=${state.year}&month=${state.month}`, {
-            credentials: "same-origin"
-        });
+        const res = await fetch(
+            `/api/expenses/?year=${state.year}&month=${state.month}`,
+            {
+                credentials: "same-origin"
+            }
+        );
+
         if (!res.ok) return;
+
         const data = await res.json();
+
         state.expenses = data.expenses || [];
         renderExpensesTable();
     } catch (err) {
@@ -257,7 +382,7 @@ async function loadExpensesData() {
     }
 }
 
-// Render Expenses Table with Search & Filter
+// Render expenses table with search and category filtering
 function renderExpensesTable() {
     const tbody = document.getElementById("expenseTbody");
     const emptyState = document.getElementById("emptyExpenseState");
@@ -265,13 +390,23 @@ function renderExpensesTable() {
     const totalRowEl = document.getElementById("tableTotalAmount");
 
     const categoryFilter = document.getElementById("filterCategory").value;
-    const searchFilter = (document.getElementById("searchExpense").value || "").toLowerCase().trim();
+    const searchFilter = (
+        document.getElementById("searchExpense").value || ""
+    ).toLowerCase().trim();
 
     const filtered = state.expenses.filter((item) => {
-        const matchesCategory = !categoryFilter || categoryFilter === "All" || item.category === categoryFilter;
-        const matchesSearch = !searchFilter ||
-            (item.title && item.title.toLowerCase().includes(searchFilter)) ||
-            (item.notes && item.notes.toLowerCase().includes(searchFilter));
+        const matchesCategory =
+            !categoryFilter ||
+            categoryFilter === "All" ||
+            item.category === categoryFilter;
+
+        const matchesSearch =
+            !searchFilter ||
+            (item.title &&
+                item.title.toLowerCase().includes(searchFilter)) ||
+            (item.notes &&
+                item.notes.toLowerCase().includes(searchFilter));
+
         return matchesCategory && matchesSearch;
     });
 
@@ -280,6 +415,11 @@ function renderExpensesTable() {
     if (filtered.length === 0) {
         tableContainer.style.display = "none";
         emptyState.style.display = "block";
+
+        if (totalRowEl) {
+            totalRowEl.textContent = formatCurrency(0);
+        }
+
         return;
     }
 
@@ -287,29 +427,46 @@ function renderExpensesTable() {
     emptyState.style.display = "none";
 
     let sum = 0;
+
     filtered.forEach((item) => {
         sum += Number(item.amount) || 0;
-        const tr = document.createElement("tr");
 
+        const tr = document.createElement("tr");
         const catClass = getCategoryClass(item.category);
 
         tr.innerHTML = `
-            <td>${item.date}</td>
-            <td><strong>${escapeHtml(item.title)}</strong></td>
-            <td><span class="category-tag ${catClass}">${escapeHtml(item.category)}</span></td>
-            <td><small style="color: #718096;">${item.notes ? escapeHtml(item.notes) : '-'}</small></td>
+            <td>${escapeHtml(item.date || "")}</td>
+            <td><strong>${escapeHtml(item.title || "")}</strong></td>
+            <td>
+                <span class="category-tag ${catClass}">
+                    ${escapeHtml(item.category || "Other")}
+                </span>
+            </td>
+            <td>
+                <small style="color: #718096;">
+                    ${item.notes ? escapeHtml(item.notes) : "-"}
+                </small>
+            </td>
             <td><strong>${formatCurrency(item.amount)}</strong></td>
             <td>
                 <div class="action-buttons-group">
-                    <button type="button" class="btn-edit-row" data-id="${item.id}" title="Edit expense">
-                        Edit
-                    </button>
-                    <button type="button" class="btn-delete-row" data-id="${item.id}" title="Delete expense">
-                        Delete
-                    </button>
+                    <button
+                        type="button"
+                        class="btn-edit-row"
+                        data-id="${item.id}"
+                        title="Edit expense"
+                    >Edit</button>
+
+                    <button
+                        type="button"
+                        class="btn-delete-row"
+                        data-id="${item.id}"
+                        title="Delete expense"
+                    >Delete</button>
                 </div>
             </td>
         `;
+
         tbody.appendChild(tr);
     });
 
@@ -317,26 +474,28 @@ function renderExpensesTable() {
         totalRowEl.textContent = formatCurrency(sum);
     }
 
-    // Attach edit button listeners
+    // Edit expense buttons
     tbody.querySelectorAll(".btn-edit-row").forEach((btn) => {
         btn.addEventListener("click", () => {
-            const id = btn.getAttribute("data-id");
-            openEditExpenseModal(id);
+            openEditExpenseModal(btn.getAttribute("data-id"));
         });
     });
 
-    // Attach delete button listeners
+    // Delete expense buttons
     tbody.querySelectorAll(".btn-delete-row").forEach((btn) => {
         btn.addEventListener("click", () => {
-            const id = btn.getAttribute("data-id");
-            deleteExpense(id);
+            deleteExpense(btn.getAttribute("data-id"));
         });
     });
 }
 
+// Escape HTML to safely display user-provided values
 function escapeHtml(str) {
-    if (!str) return "";
-    return str
+    if (str === null || str === undefined) {
+        return "";
+    }
+
+    return String(str)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -344,9 +503,11 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
-// Delete Expense
+// Delete expense
 async function deleteExpense(id) {
-    if (!confirm("Are you sure you want to delete this expense?")) return;
+    if (!confirm("Are you sure you want to delete this expense?")) {
+        return;
+    }
 
     try {
         const res = await fetch(`/api/expenses/${id}/`, {
@@ -356,211 +517,335 @@ async function deleteExpense(id) {
                 "X-CSRFToken": readCookie("csrftoken")
             }
         });
+
         if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
+
             alert(errData.error || "Unable to delete expense.");
             return;
         }
-        showFeedback("tableFeedback", "Expense deleted successfully.", true);
+
+        showFeedback(
+            "tableFeedback",
+            "Expense deleted successfully.",
+            true
+        );
+
         await refreshDashboard();
-    } catch {
+    } catch (err) {
+        console.error("Failed to delete expense:", err);
         alert("Network error while deleting expense.");
     }
 }
 
-// Setup Form Handlers
+// Setup form handlers
 function setupForms() {
     // Set default date for Add Expense
     const expenseDateInput = document.getElementById("expenseDate");
-    const todayStr = new Date().toISOString().split("T")[0];
-    expenseDateInput.value = todayStr;
 
-    // Budget Form Submit
+    if (expenseDateInput) {
+        const todayStr = new Date().toISOString().split("T")[0];
+        expenseDateInput.value = todayStr;
+    }
+
+    // Budget form submission
     const budgetForm = document.getElementById("budgetForm");
     const saveBudgetBtn = document.getElementById("saveBudgetBtn");
 
-    budgetForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const rawAmount = document.getElementById("budgetAmount").value.trim();
-        const amount = parseFloat(rawAmount);
+    if (budgetForm) {
+        budgetForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        if (isNaN(amount) || amount < 0) {
-            showFeedback("budgetFeedback", "Please enter a valid positive budget amount.", false);
-            return;
-        }
+            const rawAmount =
+                document.getElementById("budgetAmount").value.trim();
 
-        saveBudgetBtn.disabled = true;
-        saveBudgetBtn.textContent = "Saving...";
+            const amount = Number(rawAmount);
 
-        try {
-            const res = await fetch("/api/budget/", {
-                method: "POST",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": readCookie("csrftoken"),
-                },
-                body: JSON.stringify({
-                    year: state.year,
-                    month: state.month,
-                    amount: amount,
-                }),
-            });
-
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                showFeedback("budgetFeedback", data.error || "Failed to save monthly budget.", false);
+            if (
+                rawAmount === "" ||
+                !Number.isFinite(amount) ||
+                amount < 0
+            ) {
+                showFeedback(
+                    "budgetFeedback",
+                    "Please enter a valid non-negative budget amount.",
+                    false
+                );
                 return;
             }
 
-            showFeedback("budgetFeedback", `Budget for ${MONTH_NAMES[state.month - 1]} set to ${formatCurrency(amount)}!`, true);
-            await loadBudgetData();
-        } catch {
-            showFeedback("budgetFeedback", "Unable to save budget. Check connection.", false);
-        } finally {
-            saveBudgetBtn.disabled = false;
-            saveBudgetBtn.textContent = "Save Monthly Budget";
-        }
-    });
+            saveBudgetBtn.disabled = true;
+            saveBudgetBtn.textContent = "Saving...";
 
-    // Expense Form Submit
+            try {
+                const res = await fetch("/api/budget/", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": readCookie("csrftoken")
+                    },
+                    body: JSON.stringify({
+                        year: state.year,
+                        month: state.month,
+                        amount: amount
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    showFeedback(
+                        "budgetFeedback",
+                        data.error || "Failed to save monthly budget.",
+                        false
+                    );
+                    return;
+                }
+
+                showFeedback(
+                    "budgetFeedback",
+                    `Budget for ${MONTH_NAMES[state.month - 1]} set to ${formatCurrency(amount)}!`,
+                    true
+                );
+
+                await loadBudgetData();
+            } catch (err) {
+                console.error("Failed to save budget:", err);
+
+                showFeedback(
+                    "budgetFeedback",
+                    "Unable to save budget. Check connection.",
+                    false
+                );
+            } finally {
+                saveBudgetBtn.disabled = false;
+                saveBudgetBtn.textContent = "Save Monthly Budget";
+            }
+        });
+    }
+
+    // Add expense form submission
     const expenseForm = document.getElementById("expenseForm");
     const addExpenseBtn = document.getElementById("addExpenseBtn");
 
-    expenseForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    if (expenseForm) {
+        expenseForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        const title = document.getElementById("expenseTitle").value.trim();
-        const amount = parseFloat(document.getElementById("expenseAmount").value);
-        const category = document.getElementById("expenseCategory").value;
-        const dateVal = document.getElementById("expenseDate").value;
-        const notes = document.getElementById("expenseNotes").value.trim();
+            const title =
+                document.getElementById("expenseTitle").value.trim();
 
-        if (!title) {
-            showFeedback("expenseFeedback", "Please enter an expense description.", false);
-            return;
-        }
+            const amount = Number(
+                document.getElementById("expenseAmount").value
+            );
 
-        if (isNaN(amount) || amount <= 0) {
-            showFeedback("expenseFeedback", "Please enter a valid positive amount.", false);
-            return;
-        }
+            const category =
+                document.getElementById("expenseCategory").value;
 
-        if (!dateVal) {
-            showFeedback("expenseFeedback", "Please select a valid date.", false);
-            return;
-        }
+            const dateVal =
+                document.getElementById("expenseDate").value;
 
-        addExpenseBtn.disabled = true;
-        addExpenseBtn.textContent = "Adding...";
+            const notes =
+                document.getElementById("expenseNotes").value.trim();
 
-        try {
-            const res = await fetch("/api/expenses/", {
-                method: "POST",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": readCookie("csrftoken"),
-                },
-                body: JSON.stringify({
-                    title,
-                    amount,
-                    category,
-                    date: dateVal,
-                    notes,
-                }),
-            });
-
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                const errorMsg = (data.errors ? Object.values(data.errors).join(" ") : "") || data.error || "Failed to add expense.";
-                showFeedback("expenseFeedback", errorMsg, false);
+            if (!title) {
+                showFeedback(
+                    "expenseFeedback",
+                    "Please enter an expense description.",
+                    false
+                );
                 return;
             }
 
-            showFeedback("expenseFeedback", `Expense "${title}" (${formatCurrency(amount)}) added!`, true);
-            document.getElementById("expenseTitle").value = "";
-            document.getElementById("expenseAmount").value = "";
-            document.getElementById("expenseNotes").value = "";
-
-            // If the expense was added for a different month/year, switch state so it appears in the table
-            const parts = dateVal.split("-");
-            if (parts.length >= 2) {
-                const expYear = parseInt(parts[0], 10);
-                const expMonth = parseInt(parts[1], 10);
-                if (expYear !== state.year || expMonth !== state.month) {
-                    state.year = expYear;
-                    state.month = expMonth;
-                    syncDateControls();
-                }
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showFeedback(
+                    "expenseFeedback",
+                    "Please enter a valid positive amount.",
+                    false
+                );
+                return;
             }
-            await refreshDashboard();
-        } catch {
-            showFeedback("expenseFeedback", "Unable to add expense. Check connection.", false);
-        } finally {
-            addExpenseBtn.disabled = false;
-            addExpenseBtn.textContent = "➕ Add Expense";
-        }
-    });
+
+            if (!dateVal) {
+                showFeedback(
+                    "expenseFeedback",
+                    "Please select a valid date.",
+                    false
+                );
+                return;
+            }
+
+            addExpenseBtn.disabled = true;
+            addExpenseBtn.textContent = "Adding...";
+
+            try {
+                const res = await fetch("/api/expenses/", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": readCookie("csrftoken")
+                    },
+                    body: JSON.stringify({
+                        title,
+                        amount,
+                        category,
+                        date: dateVal,
+                        notes
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    const errorMsg =
+                        (data.errors
+                            ? Object.values(data.errors).join(" ")
+                            : "") ||
+                        data.error ||
+                        "Failed to add expense.";
+
+                    showFeedback(
+                        "expenseFeedback",
+                        errorMsg,
+                        false
+                    );
+                    return;
+                }
+
+                showFeedback(
+                    "expenseFeedback",
+                    `Expense "${title}" (${formatCurrency(amount)}) added!`,
+                    true
+                );
+
+                document.getElementById("expenseTitle").value = "";
+                document.getElementById("expenseAmount").value = "";
+                document.getElementById("expenseNotes").value = "";
+
+                // Switch to the month of the newly added expense
+                const parts = dateVal.split("-");
+
+                if (parts.length >= 2) {
+                    const expYear = parseInt(parts[0], 10);
+                    const expMonth = parseInt(parts[1], 10);
+
+                    if (
+                        expYear !== state.year ||
+                        expMonth !== state.month
+                    ) {
+                        state.year = expYear;
+                        state.month = expMonth;
+                        syncDateControls();
+                    }
+                }
+
+                await refreshDashboard();
+            } catch (err) {
+                console.error("Failed to add expense:", err);
+
+                showFeedback(
+                    "expenseFeedback",
+                    "Unable to add expense. Check connection.",
+                    false
+                );
+            } finally {
+                addExpenseBtn.disabled = false;
+                addExpenseBtn.textContent = "âž• Add Expense";
+            }
+        });
+    }
 
     // Table filters
-    document.getElementById("filterCategory").addEventListener("change", renderExpensesTable);
-    document.getElementById("searchExpense").addEventListener("input", renderExpensesTable);
+    const filterCategory = document.getElementById("filterCategory");
+    const searchExpense = document.getElementById("searchExpense");
+
+    if (filterCategory) {
+        filterCategory.addEventListener("change", renderExpensesTable);
+    }
+
+    if (searchExpense) {
+        searchExpense.addEventListener("input", renderExpensesTable);
+    }
 
     // Logout
     const logoutBtn = document.getElementById("logoutButton");
-    logoutBtn.addEventListener("click", async () => {
-        logoutBtn.disabled = true;
-        try {
-            await fetch("/api/logout/", {
-                method: "POST",
-                credentials: "same-origin",
-                headers: { "X-CSRFToken": readCookie("csrftoken") },
-            });
-            window.location.replace("/");
-        } catch {
-            window.location.replace("/");
-        }
-    });
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+            logoutBtn.disabled = true;
+
+            try {
+                await fetch("/api/logout/", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRFToken": readCookie("csrftoken")
+                    }
+                });
+            } catch (err) {
+                console.error("Logout request failed:", err);
+            } finally {
+                window.location.replace("/");
+            }
+        });
+    }
 }
 
-// Edit Expense Modal Handlers
+// Open Edit Expense Modal
 function openEditExpenseModal(id) {
-    const item = state.expenses.find((exp) => String(exp.id) === String(id));
+    const item = state.expenses.find(
+        (exp) => String(exp.id) === String(id)
+    );
+
     if (!item) return;
 
     document.getElementById("editExpenseId").value = item.id;
     document.getElementById("editExpenseTitle").value = item.title;
     document.getElementById("editExpenseAmount").value = item.amount;
-    document.getElementById("editExpenseCategory").value = item.category || "Other";
+
+    document.getElementById("editExpenseCategory").value =
+        item.category || "Other";
+
     document.getElementById("editExpenseDate").value = item.date;
     document.getElementById("editExpenseNotes").value = item.notes || "";
 
     const feedbackEl = document.getElementById("editExpenseFeedback");
+
     if (feedbackEl) {
         feedbackEl.className = "feedback-alert";
         feedbackEl.textContent = "";
     }
 
     const modal = document.getElementById("editExpenseModal");
+
     if (modal) {
         modal.classList.add("active");
         modal.setAttribute("aria-hidden", "false");
+
         setTimeout(() => {
-            const titleInput = document.getElementById("editExpenseTitle");
-            if (titleInput) titleInput.focus();
+            const titleInput =
+                document.getElementById("editExpenseTitle");
+
+            if (titleInput) {
+                titleInput.focus();
+            }
         }, 50);
     }
 }
 
+// Close Edit Expense Modal
 function closeEditExpenseModal() {
     const modal = document.getElementById("editExpenseModal");
+
     if (modal) {
         modal.classList.remove("active");
         modal.setAttribute("aria-hidden", "true");
     }
 }
 
+// Setup Edit Modal
 function setupEditModal() {
     const modal = document.getElementById("editExpenseModal");
     const closeBtn = document.getElementById("closeEditModalBtn");
@@ -568,8 +853,14 @@ function setupEditModal() {
     const editForm = document.getElementById("editExpenseForm");
     const saveBtn = document.getElementById("saveEditExpenseBtn");
 
-    if (closeBtn) closeBtn.addEventListener("click", closeEditExpenseModal);
-    if (cancelBtn) cancelBtn.addEventListener("click", closeEditExpenseModal);
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeEditExpenseModal);
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", closeEditExpenseModal);
+    }
+
     if (modal) {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) {
@@ -579,7 +870,11 @@ function setupEditModal() {
     }
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && modal && modal.classList.contains("active")) {
+        if (
+            e.key === "Escape" &&
+            modal &&
+            modal.classList.contains("active")
+        ) {
             closeEditExpenseModal();
         }
     });
@@ -589,24 +884,47 @@ function setupEditModal() {
             e.preventDefault();
 
             const id = document.getElementById("editExpenseId").value;
-            const title = document.getElementById("editExpenseTitle").value.trim();
-            const amount = parseFloat(document.getElementById("editExpenseAmount").value);
-            const category = document.getElementById("editExpenseCategory").value;
-            const dateVal = document.getElementById("editExpenseDate").value;
-            const notes = document.getElementById("editExpenseNotes").value.trim();
+
+            const title =
+                document.getElementById("editExpenseTitle").value.trim();
+
+            const amount = Number(
+                document.getElementById("editExpenseAmount").value
+            );
+
+            const category =
+                document.getElementById("editExpenseCategory").value;
+
+            const dateVal =
+                document.getElementById("editExpenseDate").value;
+
+            const notes =
+                document.getElementById("editExpenseNotes").value.trim();
 
             if (!title) {
-                showFeedback("editExpenseFeedback", "Please enter an expense description.", false);
+                showFeedback(
+                    "editExpenseFeedback",
+                    "Please enter an expense description.",
+                    false
+                );
                 return;
             }
 
-            if (isNaN(amount) || amount <= 0) {
-                showFeedback("editExpenseFeedback", "Please enter a valid positive amount.", false);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showFeedback(
+                    "editExpenseFeedback",
+                    "Please enter a valid positive amount.",
+                    false
+                );
                 return;
             }
 
             if (!dateVal) {
-                showFeedback("editExpenseFeedback", "Please select a valid date.", false);
+                showFeedback(
+                    "editExpenseFeedback",
+                    "Please select a valid date.",
+                    false
+                );
                 return;
             }
 
@@ -619,29 +937,52 @@ function setupEditModal() {
                     credentials: "same-origin",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRFToken": readCookie("csrftoken"),
+                        "X-CSRFToken": readCookie("csrftoken")
                     },
                     body: JSON.stringify({
                         title,
                         amount,
                         category,
                         date: dateVal,
-                        notes,
-                    }),
+                        notes
+                    })
                 });
 
                 const data = await res.json().catch(() => ({}));
+
                 if (!res.ok) {
-                    const errorMsg = (data.errors ? Object.values(data.errors).join(" ") : "") || data.error || "Failed to update expense.";
-                    showFeedback("editExpenseFeedback", errorMsg, false);
+                    const errorMsg =
+                        (data.errors
+                            ? Object.values(data.errors).join(" ")
+                            : "") ||
+                        data.error ||
+                        "Failed to update expense.";
+
+                    showFeedback(
+                        "editExpenseFeedback",
+                        errorMsg,
+                        false
+                    );
                     return;
                 }
 
                 closeEditExpenseModal();
-                showFeedback("tableFeedback", `Expense "${title}" updated successfully!`, true);
+
+                showFeedback(
+                    "tableFeedback",
+                    `Expense "${title}" updated successfully!`,
+                    true
+                );
+
                 await refreshDashboard();
-            } catch {
-                showFeedback("editExpenseFeedback", "Unable to update expense. Check connection.", false);
+            } catch (err) {
+                console.error("Failed to update expense:", err);
+
+                showFeedback(
+                    "editExpenseFeedback",
+                    "Unable to update expense. Check connection.",
+                    false
+                );
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.textContent = "Save Changes";
@@ -650,12 +991,17 @@ function setupEditModal() {
     }
 }
 
+// Refresh dashboard data
 async function refreshDashboard() {
     updateMonthLabels();
-    await Promise.all([loadBudgetData(), loadExpensesData()]);
+
+    await Promise.all([
+        loadBudgetData(),
+        loadExpensesData()
+    ]);
 }
 
-// Initial Boot
+// Initial startup
 document.addEventListener("DOMContentLoaded", () => {
     initSession();
     setupDateSelectors();
